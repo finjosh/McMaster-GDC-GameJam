@@ -11,6 +11,7 @@
 #include "Utils/Graphics/WindowHandler.hpp"
 #include "Utils/GameObject.hpp"
 #include "Utils/Physics/Collider.hpp"
+#include "ParticleEmitter.hpp"
 
 class Player : public sf::RectangleShape, public GameObject, public Collider
 {
@@ -30,8 +31,15 @@ protected:
 private:
     // TODO make a const for the cool downs and change these to timers
     float _shootCooldown = 0.f;
+    ParticleEmitter* _forwardBooster = nullptr;
+    ParticleEmitter* _backwardBooster = nullptr;
+    ParticleEmitter* _leftFBooster = nullptr;
+    ParticleEmitter* _leftBBooster = nullptr;
+    ParticleEmitter* _rightFBooster = nullptr;
+    ParticleEmitter* _rightBBooster = nullptr;
 
-    static const b2Vec2 size;
+    static const b2Vec2 _size;
+    static sf::CircleShape _shape;
 };
 
 #endif

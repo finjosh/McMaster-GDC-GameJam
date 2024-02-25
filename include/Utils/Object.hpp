@@ -4,13 +4,15 @@
 #pragma once
 
 #include <atomic>
+#include <complex.h>
 
 #include "Utils/EventHelper.hpp"
+#include "box2d/b2_math.h"
 
 /// @brief used as a simple implementation of the pure virtual destroy function
 #define createDestroy() inline void destroy() override { delete(this); };
 
-// TODO this should have its own position and rotation
+// TODO setup object children and position update based on collider
 /// @note the pure virtual "destroy" function only has to handle the destruction of the derived object
 class Object
 {
@@ -81,6 +83,32 @@ public:
     /// @brief MUST be implemented in the final class which derives from object
     virtual void destroy() = 0;
 
+    /// @param vec global b2Vec2
+    /// @returns the equivalent local b2Vec2
+    b2Vec2 getLocalVector(const b2Vec2& vec) const;
+    /// @param vec local b2Vec2
+    /// @return the equivalent global b2Vec2
+    b2Vec2 getGlobalVector(const b2Vec2& vec) const;
+    /// @brief rotates the given b2Vec2 around this object
+    /// @param vec global vector
+    /// @param rot rotation in RAD
+    /// @returns the rotated vector
+    b2Vec2 rotateAround(const b2Vec2& vec, const float& rot) const;
+    /// @brief rotates the given b2Vec2 around the given center
+    /// @param vec the point to rotate
+    /// @param center the point to rotate around
+    /// @param rot rotation in RAD
+    /// @returns the rotated vector
+    static b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot);
+    void setPosition(const b2Vec2& position);
+    b2Vec2 getPosition() const;
+    /// @param rotation in radians
+    void setRotation(const float& rotation);
+    /// @returns rotation in radians
+    float getRotation() const;
+    void setTransform(const b2Transform& transform);
+    b2Transform getTransform() const;
+
 protected:
     /// @warning only use this if you know what you are doing
     Object(unsigned long long id);
@@ -92,6 +120,8 @@ protected:
 private:
     std::atomic_bool _enabled = true;
     unsigned long long _id = 0;
+
+    b2Transform _transform;
 
     static std::atomic_ullong _lastID;
 };

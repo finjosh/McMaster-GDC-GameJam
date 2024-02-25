@@ -62,3 +62,13 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
         collider->PostSolve(contact, impulse);
     }
 }
+
+Object::Ptr CollisionManager::addObject(Object* object)
+{
+    _objects.insert({object});
+}
+
+void CollisionManager::removeObject(Object* object)
+{
+    _objects.erase({object});
+}

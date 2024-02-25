@@ -5,12 +5,16 @@ Collider::Collider()
 {
     Object::onDisabled(&Collider::updatePhysicsState, this);
     Object::onEnabled(&Collider::updatePhysicsState, this);
+
+    CollisionManager::addObject(this);
 }
 
 Collider::~Collider()
 {
     if (_body != nullptr)
         WorldHandler::getWorld().DestroyBody(_body);
+
+    CollisionManager::removeObject(this);
 }
 
 b2Body* Collider::operator->()
@@ -110,6 +114,11 @@ void Collider::updatePhysicsState()
     _body->SetEnabled(_enabled && Object::isEnabled());
 }
 
+// TODO implement this in the collision manager
+void Collider::_updatePosition()
+{
+    Object::setTransform(_body->GetTransform());
+}
 
 //* Collision Data
 

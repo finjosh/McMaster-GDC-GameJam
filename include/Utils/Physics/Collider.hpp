@@ -28,6 +28,7 @@ private:
     b2Fixture* _otherFixture;
 };
 
+// TODO add the ability to disable only collisions
 /// @note do not use body user data as that stores this collider
 class Collider : public virtual Object
 {
@@ -95,6 +96,9 @@ public:
     /// @param impulse the impulse data
     inline virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
 
+    /// @brief only use this if you know what you are doing
+    void _updatePosition();
+
 protected:
     /// @brief creates a body in the world with the default body def parameters
     void initCollider(const float& x = 0, const float& y = 0);
@@ -114,3 +118,4 @@ private:
 };
 
 #endif
+ 

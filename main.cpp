@@ -66,7 +66,7 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Escape)
                 window.close();
 
             gui.handleEvent(event);
@@ -98,6 +98,7 @@ int main()
 
         //! Do physics before this
         WorldHandler::updateWorld(deltaTime.asSeconds());
+        
         //! Draw after this
 
         //* Write code here
