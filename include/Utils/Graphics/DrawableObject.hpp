@@ -7,6 +7,7 @@
 
 #include "Utils/Object.hpp"
 
+// TODO make a children draw method for better drawing
 class DrawableObject : public virtual Object
 {
 public:

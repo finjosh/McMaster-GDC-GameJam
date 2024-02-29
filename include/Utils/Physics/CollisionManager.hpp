@@ -20,14 +20,17 @@ public:
     void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override;
     void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override;
 
+    /// @brief Make sure to call this every frame after box2d update
+    static void Update();
+
 protected:
-    static Object::Ptr addObject(Object* object);
-    static void removeObject(Object* object);
+    static void addCollider(Collider* Collider);
+    static void removeCollider(Collider* Collider);
     
     friend Collider;
 
 private:
-    static std::unordered_set<Object*> _objects;
+    static std::unordered_set<Collider*> _objects;
 };
 
 #endif

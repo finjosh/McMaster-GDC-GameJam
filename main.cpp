@@ -98,7 +98,7 @@ int main()
 
         //! Do physics before this
         WorldHandler::updateWorld(deltaTime.asSeconds());
-        
+        CollisionManager::Update();
         //! Draw after this
 
         //* Write code here

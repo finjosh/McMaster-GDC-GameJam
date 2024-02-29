@@ -1,24 +1,24 @@
 #include "ParticleEmitter.hpp"
 
-ParticleEmitter::Particle::Particle(const sf::Vector2f& pos, const sf::Vector2f& vel, const float& rotation) 
+ParticleEmitter::Particle::Particle(const b2Vec2& pos, const b2Vec2& vel, const float& rotation) 
     : _position(pos), _velocity(vel), _rotation(rotation) {}
 
-void ParticleEmitter::Particle::setPosition(const sf::Vector2f& position)
+void ParticleEmitter::Particle::setPosition(const b2Vec2& position)
 {
     _position = position;
 }
 
-sf::Vector2f ParticleEmitter::Particle::getPosition() const
+b2Vec2 ParticleEmitter::Particle::getPosition() const
 {
     return _position;
 }
 
-void ParticleEmitter::Particle::setVelocity(const sf::Vector2f& velocity)
+void ParticleEmitter::Particle::setVelocity(const b2Vec2& velocity)
 {
     _velocity = velocity;
 }
 
-sf::Vector2f ParticleEmitter::Particle::getVelocity() const
+b2Vec2 ParticleEmitter::Particle::getVelocity() const
 {
     return _velocity;
 }
@@ -48,7 +48,7 @@ void ParticleEmitter::Particle::setAlpha(const int8_t& value)
     _alpha = value;
 }
 
-void ParticleEmitter::Particle::move(const sf::Vector2f& vec)
+void ParticleEmitter::Particle::move(const b2Vec2& vec)
 {
     _position.x += vec.x;
     _position.y += vec.y;
@@ -77,11 +77,15 @@ void ParticleEmitter::Particle::update(const float& deltaTime)
 ParticleEmitter::ParticleEmitter(sf::Shape* shape) : _particleShape(shape)
 {}
 
-ParticleEmitter:: ParticleEmitter(sf::Shape* shape,
-                    const sf::Vector2f& pos, const float& vel, const float& rot, const float& spawnRate, 
+ParticleEmitter::ParticleEmitter(sf::Shape* shape, const b2Vec2& pos, 
+                    const float& vel, const float& spawnRate, const float& rot,
                     const float& lifetime, const int& spawnAmount, const float& fadeOutTime, const float& spread)
-    : _particleShape(shape), _position(pos), _velocity(vel), _rotation(rot), _spawnRate(spawnRate), _lifetime(lifetime), 
-    _spawnAmount(spawnAmount), _fadeOutTime(fadeOutTime), _spread(spread) {}
+    : _particleShape(shape), _velocity(vel), _spawnRate(spawnRate), _lifetime(lifetime), 
+    _spawnAmount(spawnAmount), _fadeOutTime(fadeOutTime), _spread(spread) 
+{
+    this->setPosition(pos);
+    this->setRotation(rot);
+}
 
 void ParticleEmitter::removeShape()
 {
@@ -193,16 +197,6 @@ void ParticleEmitter::setFadeOutTime(const float& value)
     _fadeOutTime = value;
 }
 
-float ParticleEmitter::getRotation() const
-{
-    return _rotation;
-}
-
-void ParticleEmitter::setRotation(const float& value)
-{
-    _rotation = value;
-}
-
 float ParticleEmitter::getVelocity() const
 {
     return _velocity;
@@ -213,25 +207,15 @@ void ParticleEmitter::setVelocity(const float& value)
     _velocity = value;
 }
 
-sf::Vector2f ParticleEmitter::getPosition() const
-{
-    return _position;
-}
-
-void ParticleEmitter::setPosition(const sf::Vector2f& value)
-{
-    _position = value;
-}
-
 void ParticleEmitter::emit()
 {
     for (int i = 0; i < _spawnAmount - (rand()%_randomSpawnAmount); i++)
     {
-        float spread = randX(_spread) - _spread/2;
+        float spread = (randX(_spread) - _spread/2)*b2_pi/180;
         float rotation = randX(_randomRotation);
 
-        _particles.push_back({_position, 
-                            {std::cos((_rotation + spread)*3.141592654f/180)*_velocity, std::sin((_rotation + spread)*3.141592654f/180)*_velocity}, 
+        _particles.push_back({this->getPosition(), 
+                            {std::cos(this->getRotation() + spread)*_velocity, std::sin(this->getRotation() + spread)*_velocity}, 
                             rotation});
     }
 }
@@ -264,6 +248,8 @@ void ParticleEmitter::Update(const float& deltaTime)
     }
 }
 
+#include "Utils/Debug/CommandPrompt.hpp"
+
 void ParticleEmitter::Draw(sf::RenderWindow& window)
 {
     if (_particleShape == nullptr)
@@ -273,6 +259,9 @@ void ParticleEmitter::Draw(sf::RenderWindow& window)
     {
         particle.draw(_particleShape, window);
     }
+
+    Command::Prompt::print(std::to_string(this->getPosition().x) + ", " + std::to_string(this->getPosition().y));
+    Command::Prompt::print(std::to_string(this->getRotation()*170/b2_pi));
 }
 
 float ParticleEmitter::randX(const float& x)

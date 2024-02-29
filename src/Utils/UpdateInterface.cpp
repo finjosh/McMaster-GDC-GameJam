@@ -3,6 +3,9 @@
 
 UpdateInterface::UpdateInterface()
 {
+    // _onParentRemoved(&UpdateManager::addUpdateObject, this);
+    // _onParentSet(&UpdateManager::removeUpdateObject, this);
+
     UpdateManager::addUpdateObject(this);
 }
 

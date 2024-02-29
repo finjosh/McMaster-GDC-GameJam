@@ -22,14 +22,14 @@ public:
     /// @param shape make sure that the given drawable is accessible over the lifetime of this object
     /// @param pos the position of the emitter
     /// @param vel the initial velocity of the particles
-    /// @param rot rotation starting from +x axis (degrees)
+    /// @param rot rotation radians
     /// @param spawnRate the spawn rate of particles if spawning
     /// @param lifetime the particle lifetime
     /// @param spawnAmount the amount of partials spawned at once
     /// @param fadeOutTime the time for a particle to fade out 
     /// @param spread the max angle of spread
     ParticleEmitter(sf::Shape* shape,
-                    const sf::Vector2f& pos, const float& vel, const float& rot, const float& spawnRate, 
+                    const b2Vec2& pos, const float& vel, const float& rot, const float& spawnRate, 
                     const float& lifetime, const int& spawnAmount, const float& fadeOutTime, const float& spread);
 
     /// @brief particles will still be emitted but not rendered
@@ -76,18 +76,10 @@ public:
     float getFadeOutTime() const;
     /// @brief the time for a particle to fade out
     void setFadeOutTime(const float& value = 0.f);
-    /// @brief the rotation starting from +x axis (degrees)
-    float getRotation() const;
-    /// @brief the rotation starting from +x axis (degrees)
-    void setRotation(const float& value = 0.f);
     /// @brief the initial velocity of the particles
     float getVelocity() const;
     /// @brief the initial velocity of the particles
     void setVelocity(const float& value = 0.f);
-    /// @brief the position of the emitter
-    sf::Vector2f getPosition() const;
-    /// @brief the position of the emitter
-    void setPosition(const sf::Vector2f& value);
     /// @brief force emits the particles ignoring the spawn rate
     void emit();
 
@@ -104,11 +96,11 @@ protected:
     {
     public:
         Particle() = default;
-        Particle(const sf::Vector2f& pos, const sf::Vector2f& vel, const float& rotation);
-        void setPosition(const sf::Vector2f& position);
-        sf::Vector2f getPosition() const;
-        void setVelocity(const sf::Vector2f& velocity);
-        sf::Vector2f getVelocity() const;
+        Particle(const b2Vec2& pos, const b2Vec2& vel, const float& rotation);
+        void setPosition(const b2Vec2& position);
+        b2Vec2 getPosition() const;
+        void setVelocity(const b2Vec2& velocity);
+        b2Vec2 getVelocity() const;
         /// @param rot in degrees
         void setRotation(const float& rot);
         /// @returns rotation in degrees
@@ -117,7 +109,7 @@ protected:
         int8_t getAlpha() const;
         void setAlpha(const int8_t& value = 255);
 
-        void move(const sf::Vector2f& vec);
+        void move(const b2Vec2& vec);
         void draw(sf::Shape* shape, sf::RenderWindow& window);
 
     protected:
@@ -127,8 +119,8 @@ protected:
         friend ParticleEmitter;
 
     private:
-        sf::Vector2f _position = {0,0};
-        sf::Vector2f _velocity = {0,0};
+        b2Vec2 _position = {0,0};
+        b2Vec2 _velocity = {0,0};
         /// @brief in degrees
         float _rotation = 0.f;
         float _lifetime = 0.f;
@@ -157,12 +149,8 @@ private:
     float _lifetime = 1.f;
     /// @brief the time for a particle to fade out
     float _fadeOutTime = 0.f;
-    /// @brief rotation starting from +x axis (degrees)
-    float _rotation = 0.f;
     /// @brief the initial velocity of the particles
     float _velocity = 0.f;
-    /// @brief the position of the emitter
-    sf::Vector2f _position = {0,0};
 
     std::list<Particle> _particles;
 

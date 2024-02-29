@@ -29,6 +29,7 @@ private:
 };
 
 // TODO add the ability to disable only collisions
+// TODO completely hide all body functions unless they are needed
 /// @note do not use body user data as that stores this collider
 class Collider : public virtual Object
 {
@@ -99,6 +100,8 @@ public:
     /// @brief only use this if you know what you are doing
     void _updatePosition();
 
+    bool canSetTransform() const override;
+
 protected:
     /// @brief creates a body in the world with the default body def parameters
     void initCollider(const float& x = 0, const float& y = 0);
@@ -109,6 +112,11 @@ protected:
     void initCollider(const b2BodyDef& bodyDef);
 
 private:
+    // removing the ability to set position or rotation if there is a collider
+    inline void setPosition(const b2Vec2& position) override {};
+    inline void setRotation(const float& rotation) override {};
+    inline void setTransform(const b2Transform& transform) override {};
+
     /// @brief updates the body state (enabled or not)
     void updatePhysicsState();
 
@@ -116,6 +124,39 @@ private:
     /// @brief if true follows object else physics are disabled no matter object state
     bool _enabled = true;
 };
+
+namespace std {
+    template <>
+    struct hash<Collider> {
+        inline size_t operator()(const Collider& obj) const noexcept
+        {
+            return hash<size_t>{}(obj.getID());
+        }
+    };
+    template <>
+    struct hash<Collider*> {
+        inline size_t operator()(const Collider* obj) const noexcept
+        {
+            if (obj == nullptr)
+                return 0;
+            return hash<size_t>{}(obj->getID());
+        }
+    };
+    template <>
+    struct equal_to<Collider> {
+        inline bool operator()(const Collider& obj, const Collider& obj2) const noexcept
+        {
+            return obj.getID() == obj2.getID();
+        }
+    };
+    template <>
+    struct equal_to<Collider*> {
+        inline bool operator()(const Collider* obj, const Collider* obj2) const noexcept
+        {
+            return obj->getID() == obj2->getID();
+        }
+    };
+}
 
 #endif
  

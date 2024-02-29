@@ -6,7 +6,7 @@ bool _objectComp::operator()(const Object* lhs, const Object* rhs) const
     return lhs->getID() < rhs->getID();
 }
 
-std::atomic_ullong Object::_lastID = 0;
+std::atomic_ullong Object::_lastID = 1;
 
 Object::Ptr::Ptr(Object* obj)
 {
@@ -17,7 +17,7 @@ Object::Ptr::~Ptr()
 {
     if (isValid())
     {
-        _ptr->onDestroy.disconnect(_eventID);
+        _ptr->_onDestroy.disconnect(_eventID);
     }
 }
 
@@ -47,6 +47,46 @@ Object::Ptr& Object::Ptr::operator=(const Object::Ptr& objectPtr)
     return *this;
 }
 
+bool Object::Ptr::operator==(const Object::Ptr& objectPtr) const
+{
+    return this->getID() == objectPtr.getID();
+}
+
+bool Object::Ptr::operator!=(const Object::Ptr& objectPtr) const
+{
+    return this->getID() != objectPtr.getID();
+}
+
+bool Object::Ptr::operator<(const Object::Ptr& objectPtr) const
+{
+    return this->getID() < objectPtr.getID();
+}
+
+bool Object::Ptr::operator>(const Object::Ptr& objectPtr) const
+{
+    return this->getID() > objectPtr.getID();
+}
+
+bool Object::Ptr::operator==(Object* object) const
+{
+    return *this == Object::Ptr(object);
+}
+
+bool Object::Ptr::operator!=(Object* object) const
+{
+    return *this != Object::Ptr(object);
+}
+
+bool Object::Ptr::operator<(Object* object) const
+{
+    return *this < Object::Ptr(object);
+}
+
+bool Object::Ptr::operator>(Object* object) const
+{
+    return *this > Object::Ptr(object);
+}
+
 Object* Object::Ptr::get()
 {
     return _ptr;
@@ -66,19 +106,24 @@ void Object::Ptr::setObject(Object* obj)
 {
     if (this->isValid())
     {
-        _ptr->onDestroy.disconnect(_eventID);
+        _ptr->_onDestroy.disconnect(_eventID);
         _ptr = nullptr;
     }
 
     _ptr = obj;
     if (_ptr != nullptr)
-        _eventID = _ptr->onDestroy(Object::Ptr::removePtr, this);
+        _eventID = _ptr->_onDestroy(Object::Ptr::removePtr, this);
 }
 
 void Object::Ptr::removePtr()
 {
     _ptr = nullptr;
     _eventID = 0;
+}
+
+size_t Object::Ptr::getID() const
+{
+    return (this->_ptr == nullptr ? 0 : this->_ptr->getID());
 }
 
 Object::Object()
@@ -100,6 +145,15 @@ Object::~Object()
     if (_id == 0)
         return;
     ObjectManager::removeObject(this);
+    if (_parent.isValid())
+    {
+        _parent->_removeChild(this);
+    }
+    for (auto child: _children)
+    {
+        child->destroy();
+    }
+    _onDestroy.invoke();
     onDestroy.invoke();
 }
 
@@ -107,9 +161,15 @@ void Object::setEnabled(bool enabled)
 {
     _enabled = enabled;
     if (_enabled)
+    {
+        _onEnabled.invoke();
         onEnabled.invoke();
+    }
     else
+    {
+        _onDisabled.invoke();
         onDisabled.invoke();
+    }
 }
 
 bool Object::isEnabled() const
@@ -127,6 +187,33 @@ Object::Ptr Object::getPtr()
     return Object::Ptr(this);
 }
 
+void Object::setParent(Object::Ptr parent)
+{
+    if (_parent.isValid())
+    {
+        _parent->_removeChild(this);
+    }
+    
+    // if not valid have no parent
+    if (parent.isValid())
+    {
+        parent->_addChild(this);
+        _onParentSet.invoke();
+        onParentSet.invoke();
+    }
+    else
+    {
+        _onParentRemoved.invoke();
+        onParentRemoved.invoke();
+    }
+    _parent = parent;
+}
+
+Object::Ptr Object::getParent()
+{
+    return _parent;
+}
+
 b2Vec2 Object::getLocalVector(const b2Vec2& vec) const
 {
     return b2MulT(_transform.q, vec);
@@ -137,21 +224,28 @@ b2Vec2 Object::getGlobalVector(const b2Vec2& vec) const
     return b2Mul(_transform.q, vec);
 }
 
-b2Vec2 Object::rotateAround(const b2Vec2& vec, const float& rot) const
+void Object::rotateAround(const b2Vec2& center, const float& rot)
 {
-    rotateAround(vec, _transform.p, rot);
+    _transform.p = rotateAround(_transform.p, center, rot);
 }
 
 b2Vec2 Object::rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot)
 {
-    auto polar = std::polar(1.f, rot);
-    b2Vec2 temp = vec - center;
-    temp *= polar.real();
-    return temp + center;
+    auto polar = std::polar<float>(1.0, rot);
+    std::complex<float> temp(vec.x - center.x, vec.y - center.y);
+    temp *= polar;
+    return {temp.real() + center.x, temp.imag() + center.y};
 }
 
 void Object::setPosition(const b2Vec2& position)
 {   
+    b2Vec2 posChange = position - _transform.p;
+
+    for (auto child: _children)
+    {
+        child->move(posChange);
+    }
+
     _transform.p = position;
 }
 
@@ -162,6 +256,14 @@ b2Vec2 Object::getPosition() const
 
 void Object::setRotation(const float& rotation)
 {
+    float rotChange = rotation - _transform.q.GetAngle();
+
+    for (auto child: _children)
+    {
+        child->rotateAround(_transform.p, rotChange);
+        child->rotate(rotChange);
+    }
+
     _transform.q.Set(rotation);
 }
 
@@ -172,10 +274,57 @@ float Object::getRotation() const
 
 void Object::setTransform(const b2Transform& transform)
 {
+    b2Vec2 posChange = transform.p - _transform.p;
+    float rotChange = transform.q.GetAngle() - _transform.q.GetAngle();
+    
+    for (auto child: _children)
+    {
+        child->rotateAround(_transform.p, rotChange);
+        child->rotate(rotChange);
+        child->move(posChange);
+    }
+
     _transform = transform;
 }
 
 b2Transform Object::getTransform() const
 {
     return _transform;
+}
+
+bool Object::canSetTransform() const
+{
+    return true;
+}
+
+void Object::move(const b2Vec2& move)
+{
+    _transform.p += move;
+
+    for (auto child: _children)
+    {
+        child->move(move);
+    }
+}
+
+void Object::rotate(const float& rot)
+{
+    _transform.q.Set(_transform.q.GetAngle() + rot);
+
+    for (auto child: _children)
+    {
+        child->rotate(rot);
+    }
+}
+
+void Object::_addChild(Object* object)
+{
+    if (object == nullptr) return;
+    _children.push_back(object);
+}
+
+void Object::_removeChild(Object* object)
+{
+    if (object == nullptr) return;
+    _children.remove_if([object](const Object* obj){ return obj == object; });
 }

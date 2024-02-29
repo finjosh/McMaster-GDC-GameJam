@@ -1,6 +1,8 @@
 #include "Utils/Physics/CollisionManager.hpp"
 #include "Utils/Physics/Collider.hpp"
 
+std::unordered_set<Collider*> CollisionManager::_objects;
+
 // TODO call this after the box2d step so objects can be destroyed
 void CollisionManager::BeginContact(b2Contact* contact)
 {
@@ -63,12 +65,20 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
     }
 }
 
-Object::Ptr CollisionManager::addObject(Object* object)
+void CollisionManager::Update()
 {
-    _objects.insert({object});
+    for (auto obj: _objects)
+    {
+        obj->_updatePosition();
+    }
 }
 
-void CollisionManager::removeObject(Object* object)
+void CollisionManager::addCollider(Collider* Collider)
 {
-    _objects.erase({object});
+    _objects.insert({Collider});
+}
+
+void CollisionManager::removeCollider(Collider* Collider)
+{
+    _objects.erase({Collider});
 }

@@ -3,10 +3,12 @@
 
 Collider::Collider()
 {
-    Object::onDisabled(&Collider::updatePhysicsState, this);
-    Object::onEnabled(&Collider::updatePhysicsState, this);
+    Object::_onDisabled(&Collider::updatePhysicsState, this);
+    Object::_onEnabled(&Collider::updatePhysicsState, this);
+    // Object::_onParentRemoved(&CollisionManager::addCollider, this);
+    // Object::_onParentSet(&CollisionManager::removeCollider, this);
 
-    CollisionManager::addObject(this);
+    CollisionManager::addCollider(this);
 }
 
 Collider::~Collider()
@@ -14,7 +16,7 @@ Collider::~Collider()
     if (_body != nullptr)
         WorldHandler::getWorld().DestroyBody(_body);
 
-    CollisionManager::removeObject(this);
+    CollisionManager::removeCollider(this);
 }
 
 b2Body* Collider::operator->()
@@ -114,10 +116,14 @@ void Collider::updatePhysicsState()
     _body->SetEnabled(_enabled && Object::isEnabled());
 }
 
-// TODO implement this in the collision manager
 void Collider::_updatePosition()
 {
     Object::setTransform(_body->GetTransform());
+}
+
+bool Collider::canSetTransform() const
+{
+    return false;
 }
 
 //* Collision Data
