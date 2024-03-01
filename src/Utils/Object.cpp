@@ -144,15 +144,19 @@ Object::~Object()
     // this is not a real object
     if (_id == 0)
         return;
+
     ObjectManager::removeObject(this);
+    
     if (_parent.isValid())
     {
         _parent->_removeChild(this);
     }
+    
     for (auto child: _children)
     {
         child->destroy();
     }
+
     _onDestroy.invoke();
     onDestroy.invoke();
 }
@@ -189,11 +193,15 @@ Object::Ptr Object::getPtr()
 
 void Object::setParent(Object::Ptr parent)
 {
+    if (parent == this)
+        return;
+
     if (_parent.isValid())
     {
         _parent->_removeChild(this);
     }
-    
+
+    _parent = parent;
     // if not valid have no parent
     if (parent.isValid())
     {
@@ -206,7 +214,6 @@ void Object::setParent(Object::Ptr parent)
         _onParentRemoved.invoke();
         onParentRemoved.invoke();
     }
-    _parent = parent;
 }
 
 Object::Ptr Object::getParent()
@@ -226,7 +233,14 @@ b2Vec2 Object::getGlobalVector(const b2Vec2& vec) const
 
 void Object::rotateAround(const b2Vec2& center, const float& rot)
 {
-    _transform.p = rotateAround(_transform.p, center, rot);
+    b2Vec2 posChange = rotateAround(_transform.p, center, rot) - _transform.p;
+    _transform.p += posChange;
+
+    for (auto child: _children)
+    {
+        child->move(posChange);
+        child->rotateAround(_transform.p, rot);
+    }
 }
 
 b2Vec2 Object::rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot)
@@ -281,8 +295,8 @@ void Object::setTransform(const b2Transform& transform)
     {
         if (child->getPosition() != this->getPosition()) // TODO check if this is needed
             child->rotateAround(_transform.p, rotChange);
-        child->rotate(rotChange);
         child->move(posChange);
+        child->rotate(rotChange);
     }
 
     _transform = transform;

@@ -126,7 +126,7 @@ public:
     /// @returns the rotated vector
     static b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot);
     virtual void setPosition(const b2Vec2& position);
-    b2Vec2 getPosition() const;
+    b2Vec2 getPosition() const; // TODO make this default to local not global (if child)
     /// @param rotation in radians
     virtual void setRotation(const float& rotation);
     /// @returns rotation in radians

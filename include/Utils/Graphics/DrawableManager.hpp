@@ -9,13 +9,6 @@
 
 #include "DrawableObject.hpp"
 
-class DrawableObject;
-
-struct _drawableComp
-{
-    bool operator() (const DrawableObject* lhs, const DrawableObject* rhs) const;
-};
-
 class DrawableManager
 {
 public:

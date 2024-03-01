@@ -23,6 +23,22 @@ using namespace sf;
 
 void addThemeCommands();
 
+class test : public virtual Object, public DrawableObject
+{
+public:
+    void Draw(sf::RenderWindow& window) override
+    {
+        sf::RectangleShape temp({20,20});
+        temp.setPosition({this->getPosition().x*PIXELS_PER_METER, this->getPosition().y*PIXELS_PER_METER});
+        temp.setRotation(this->getRotation()*180/b2_pi);
+        temp.setOutlineColor(sf::Color::Black);
+        temp.setOutlineThickness(1);
+        window.draw(temp);
+    }
+
+    createDestroy();
+};
+
 // TODO setup a view manager that handles windows size changes
 int main()
 {
@@ -51,7 +67,13 @@ int main()
 
     //! ---------------------------------------------------
 
-    new Player(100,100);
+    auto player = new Player(100,100);
+    auto temp = new test();
+    temp->move({5,5});
+    temp->setParent(player);
+    auto temp2 = new test();
+    temp2->move({6,6});
+    temp2->setParent(temp);
 
     UpdateManager::Start();
     sf::Clock deltaClock;
