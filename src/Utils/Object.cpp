@@ -279,7 +279,8 @@ void Object::setTransform(const b2Transform& transform)
     
     for (auto child: _children)
     {
-        child->rotateAround(_transform.p, rotChange);
+        if (child->getPosition() != this->getPosition()) // TODO check if this is needed
+            child->rotateAround(_transform.p, rotChange);
         child->rotate(rotChange);
         child->move(posChange);
     }

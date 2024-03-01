@@ -78,7 +78,7 @@ ParticleEmitter::ParticleEmitter(sf::Shape* shape) : _particleShape(shape)
 {}
 
 ParticleEmitter::ParticleEmitter(sf::Shape* shape, const b2Vec2& pos, 
-                    const float& vel, const float& spawnRate, const float& rot,
+                    const float& vel, const float& rot, const float& spawnRate,
                     const float& lifetime, const int& spawnAmount, const float& fadeOutTime, const float& spread)
     : _particleShape(shape), _velocity(vel), _spawnRate(spawnRate), _lifetime(lifetime), 
     _spawnAmount(spawnAmount), _fadeOutTime(fadeOutTime), _spread(spread) 
@@ -213,9 +213,10 @@ void ParticleEmitter::emit()
     {
         float spread = (randX(_spread) - _spread/2)*b2_pi/180;
         float rotation = randX(_randomRotation);
+        auto polar = std::polar<float>(_velocity, this->getRotation() + spread);
 
         _particles.push_back({this->getPosition(), 
-                            {std::cos(this->getRotation() + spread)*_velocity, std::sin(this->getRotation() + spread)*_velocity}, 
+                            {polar.real(), polar.imag()}, 
                             rotation});
     }
 }
@@ -248,8 +249,6 @@ void ParticleEmitter::Update(const float& deltaTime)
     }
 }
 
-#include "Utils/Debug/CommandPrompt.hpp"
-
 void ParticleEmitter::Draw(sf::RenderWindow& window)
 {
     if (_particleShape == nullptr)
@@ -259,9 +258,6 @@ void ParticleEmitter::Draw(sf::RenderWindow& window)
     {
         particle.draw(_particleShape, window);
     }
-
-    Command::Prompt::print(std::to_string(this->getPosition().x) + ", " + std::to_string(this->getPosition().y));
-    Command::Prompt::print(std::to_string(this->getRotation()*170/b2_pi));
 }
 
 float ParticleEmitter::randX(const float& x)

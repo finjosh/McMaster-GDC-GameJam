@@ -6,7 +6,7 @@ sf::CircleShape Player::_shape;
 Player::Player(const float& x, const float& y, const int& layer) : DrawableObject(layer)
 {
     _shape.setFillColor(sf::Color::Red);
-    _shape.setRadius(5);
+    _shape.setRadius(3);
     _shape.setOrigin(5,5);
 
     b2PolygonShape b2shape;
@@ -21,14 +21,12 @@ Player::Player(const float& x, const float& y, const int& layer) : DrawableObjec
     RectangleShape::setOrigin(_size.x/2,_size.y/2);
     RectangleShape::setPosition(x,y);
 
-    _forwardBooster = new ParticleEmitter(&_shape, {0,0}, 25, 0, 0.1, 0.25, 5, 0.1, 25);
-    _forwardBooster->setPosition({5,0});
-    _forwardBooster->setRotation(b2_pi);
-    _backwardBooster = new ParticleEmitter(&_shape, {0,0}, 25, b2_pi/2, 0.1, 0.25, 5, 0.1, 25);
-    _leftFBooster = new ParticleEmitter(&_shape, {0,0}, 25, 0, 0.1, 0.25, 5, 0.1, 25);
-    _leftBBooster = new ParticleEmitter(&_shape, {0,0}, 25, b2_pi, 0.1, 0.25, 5, 0.1, 25);
-    _rightFBooster = new ParticleEmitter(&_shape, {0,0}, 25, b2_pi, 0.1, 0.25, 5, 0.1, 25);
-    _rightBBooster = new ParticleEmitter(&_shape, {0,0}, 25, 0, 0.1, 0.25, 5, 0.1, 25);
+    _forwardBooster = new ParticleEmitter(&_shape, {-2.5,0}, 25, b2_pi, 0.1, 0.15, 5, 0.1, 25);
+    _backwardBooster = new ParticleEmitter(&_shape, {2.5,0}, 25, 0, 0.1, 0.15, 5, 0.1, 25);
+    _leftFBooster = new ParticleEmitter(&_shape, {2,1.25}, 25, b2_pi/2, 0.1, 0.15, 5, 0.1, 25);
+    _leftBBooster = new ParticleEmitter(&_shape, {-2,-1.25}, 25, -b2_pi/2, 0.1, 0.15, 5, 0.1, 25);
+    _rightFBooster = new ParticleEmitter(&_shape, {2,-1.25}, 25, -b2_pi/2, 0.1, 0.15, 5, 0.1, 25);
+    _rightBBooster = new ParticleEmitter(&_shape, {-2,1.25}, 25, b2_pi/2, 0.1, 0.15, 5, 0.1, 25);
     _forwardBooster->setParent(this);
     _backwardBooster->setParent(this);
     _leftFBooster->setParent(this);
