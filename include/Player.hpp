@@ -23,7 +23,7 @@ public:
 
 protected:
     virtual void Update(const float& deltaTime) override;
-    virtual void Draw(sf::RenderWindow& window) override;
+    virtual void LateDraw(sf::RenderWindow& window) override;
 
     void BeginContact(CollisionData collisionData) override;
     void EndContact(CollisionData collisionData) override;

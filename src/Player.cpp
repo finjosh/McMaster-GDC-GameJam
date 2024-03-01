@@ -40,7 +40,7 @@ Player::~Player()
 
 }
 
-void Player::Draw(sf::RenderWindow& window)
+void Player::LateDraw(sf::RenderWindow& window)
 {
     RectangleShape::setPosition({Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER});
     RectangleShape::setRotation(Object::getRotation()*180/b2_pi);

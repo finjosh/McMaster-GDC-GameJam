@@ -67,4 +67,5 @@ void DrawableObject::_draw(sf::RenderWindow& window)
     {
         child->_draw(window);
     }
+    this->LateDraw(window);
 }

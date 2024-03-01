@@ -32,8 +32,10 @@ public:
     int getLayer() const;
 
     /// @brief should be used to draw the obj
-    virtual void Draw(sf::RenderWindow& window) = 0;
-    /// @brief dont use this unless you know what you are doing
+    /// @note called before children draw
+    virtual void Draw(sf::RenderWindow& window) {};
+    /// @brief this is called after children draw
+    inline virtual void LateDraw(sf::RenderWindow& window) {};
 
 protected:
     /// @brief attempts to set parent given the current object parent
