@@ -11,7 +11,7 @@
 #include "Utils/Graphics/WindowHandler.hpp"
 #include "Utils/GameObject.hpp"
 #include "Utils/Physics/Collider.hpp"
-#include "ParticleEmitter.hpp"
+#include "Utils/ParticleEmitter.hpp"
 
 class Player : public sf::RectangleShape, public GameObject, public Collider
 {

@@ -41,6 +41,11 @@ const Object* Object::Ptr::operator*() const
     return _ptr;
 }
 
+Object::Ptr::operator bool() const
+{
+    return this->isValid();
+}
+
 Object::Ptr& Object::Ptr::operator=(const Object::Ptr& objectPtr)
 {
     this->setObject(objectPtr._ptr);
@@ -288,18 +293,8 @@ float Object::getRotation() const
 
 void Object::setTransform(const b2Transform& transform)
 {
-    b2Vec2 posChange = transform.p - _transform.p;
-    float rotChange = transform.q.GetAngle() - _transform.q.GetAngle();
-    
-    for (auto child: _children)
-    {
-        if (child->getPosition() != this->getPosition()) // TODO check if this is needed
-            child->rotateAround(_transform.p, rotChange);
-        child->move(posChange);
-        child->rotate(rotChange);
-    }
-
-    _transform = transform;
+    Object::setPosition(transform.p);
+    Object::setRotation(transform.q.GetAngle());
 }
 
 b2Transform Object::getTransform() const
@@ -330,6 +325,53 @@ void Object::rotate(const float& rot)
     {
         child->rotate(rot);
     }
+}
+
+void Object::setLocalPosition(const b2Vec2& position)
+{
+    if (_parent)
+    {
+        this->setPosition(_parent->getPosition() + position);
+    }
+    else
+    {
+        this->setPosition(position);
+    }
+}
+
+b2Vec2 Object::getLocalPosition() const
+{
+    if (_parent)
+    {
+        return this->getPosition() - _parent->getPosition();
+    }
+    return this->getPosition();
+}
+
+void Object::setLocalRotation(const float& rotation)
+{
+    if (_parent)
+    {
+        this->setRotation(_parent->getRotation() + rotation);
+    }
+    else
+    {
+        this->setRotation(rotation);
+    }
+}
+
+float Object::getLocalRotation() const
+{
+    if (_parent)
+    {
+        return this->getRotation() - _parent->getRotation();
+    }
+    return this->getRotation();
+}
+
+b2Rot Object::getRotation_b2() const
+{
+    return _transform.q;
 }
 
 void Object::_addChild(Object* object)

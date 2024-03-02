@@ -17,6 +17,7 @@
 #include "Utils/Physics/CollisionManager.hpp"
 
 #include "Player.hpp"
+#include "Enemy.hpp"
 
 using namespace std;
 using namespace sf;
@@ -29,6 +30,7 @@ public:
     void Draw(sf::RenderWindow& window) override
     {
         sf::RectangleShape temp({20,20});
+        temp.setOrigin(10,10);
         temp.setPosition({this->getPosition().x*PIXELS_PER_METER, this->getPosition().y*PIXELS_PER_METER});
         temp.setRotation(this->getRotation()*180/b2_pi);
         temp.setOutlineColor(sf::Color::Black);
@@ -67,13 +69,10 @@ int main()
 
     //! ---------------------------------------------------
 
-    auto player = new Player(100,100);
-    auto temp = new test();
-    temp->move({5,5});
-    temp->setParent(player);
-    auto temp2 = new test();
-    temp2->move({6,6});
-    temp2->setParent(temp);
+    new Enemy(25,25, new Player(10,10));
+
+    sf::View camera(sf::FloatRect{0,0,1920,1080});
+    window.setView(camera);
 
     UpdateManager::Start();
     sf::Clock deltaClock;
@@ -113,10 +112,6 @@ int main()
         //* Updates for the terminating functions display
         TFuncDisplay::update();
         //! ------------------------------
-
-        auto temp = sf::RectangleShape({10000,10000});
-        temp.setFillColor(sf::Color(50,0,50));
-        window.draw(temp);
 
         //! Do physics before this
         WorldHandler::updateWorld(deltaTime.asSeconds());

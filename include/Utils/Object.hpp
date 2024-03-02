@@ -13,7 +13,8 @@
 /// @brief used as a simple implementation of the pure virtual destroy function
 #define createDestroy() inline void destroy() override { delete(this); };
 
-// TODO setup object children and position update based on collider
+#define PI b2_pi
+
 /// @note the pure virtual "destroy" function only has to handle the destruction of the derived object
 class Object
 {
@@ -28,6 +29,7 @@ public:
         Object* operator*();
         const Object* operator*() const;
         Object::Ptr& operator=(const Object::Ptr& objectPtr);
+        explicit operator bool() const;
         bool operator==(const Object::Ptr& objectPtr) const;
         bool operator!=(const Object::Ptr& objectPtr) const;
         bool operator<(const Object::Ptr& objectPtr) const;
@@ -110,10 +112,10 @@ public:
 
     /// @param vec global b2Vec2
     /// @returns the equivalent local b2Vec2
-    b2Vec2 getLocalVector(const b2Vec2& vec) const; // TODO update this for child system
+    b2Vec2 getLocalVector(const b2Vec2& vec) const;
     /// @param vec local b2Vec2
     /// @return the equivalent global b2Vec2
-    b2Vec2 getGlobalVector(const b2Vec2& vec) const; // TODO update this for child system
+    b2Vec2 getGlobalVector(const b2Vec2& vec) const;
     /// @brief rotates the given b2Vec2 around this object
     /// @param vec global vector
     /// @param rot rotation in RAD
@@ -126,11 +128,29 @@ public:
     /// @returns the rotated vector
     static b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot);
     virtual void setPosition(const b2Vec2& position);
-    b2Vec2 getPosition() const; // TODO make this default to local not global (if child)
+    /// @brief if this is a child then the position will be set according to the parent
+    /// @note if "canSetTransform" is false then this does nothing
+    /// @note if this is not a child then position is set according to global
+    /// @param position according to the parent position
+    void setLocalPosition(const b2Vec2& position);
+    b2Vec2 getPosition() const;
+    /// @note if no parent returns global position
+    /// @returns position according to parent
+    b2Vec2 getLocalPosition() const;
     /// @param rotation in radians
     virtual void setRotation(const float& rotation);
+    /// @brief if this is a child then the rotation will be set according to the parent
+    /// @note if "canSetTransform" is false then this does nothing
+    /// @note if this is not a child then rotation is set according to global
+    /// @param rotation according to the parent rotation
+    void setLocalRotation(const float& rotation);
     /// @returns rotation in radians
     float getRotation() const;
+    /// @returns the rotation in terms of b2Rot
+    b2Rot getRotation_b2() const;
+    /// @note if no parent returns global rotation
+    /// @returns rotation according to parent
+    float getLocalRotation() const;
     virtual void setTransform(const b2Transform& transform);
     b2Transform getTransform() const;
     /// @brief if there is another class that overrides the transform you should 1. not override it 2. not set transforms
@@ -148,15 +168,15 @@ protected:
     void setID(unsigned long long id);
     inline virtual void OnEnable() {};
     inline virtual void OnDisable() {};
-    /// @note do NOT disconnect all EVER
+    /// @warning do NOT disconnect all EVER
     EventHelper::Event _onEnabled;
-    /// @note do NOT disconnect all EVER
+    /// @warning do NOT disconnect all EVER
     EventHelper::Event _onDisabled;
-    /// @note do NOT disconnect all EVER
+    /// @warning do NOT disconnect all EVER
     EventHelper::Event _onDestroy;
-    /// @note do NOT disconnect all EVER
+    /// @warning do NOT disconnect all EVER
     EventHelper::Event _onParentSet;
-    /// @note do NOT disconnect all EVER
+    /// @warning do NOT disconnect all EVER
     EventHelper::Event _onParentRemoved;
 
 private:
@@ -167,7 +187,7 @@ private:
     size_t _id = 0;
 
     // TODO make a renderer that uses this transform
-    b2Transform _transform;
+    b2Transform _transform = b2Transform(b2Vec2(0,0), b2Rot(0));
 
     Object::Ptr _parent = Object::Ptr(nullptr);
     std::list<Object*> _children;
