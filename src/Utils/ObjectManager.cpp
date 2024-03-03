@@ -10,7 +10,7 @@ void ObjectManager::_objectCompClass::setID(unsigned long long id) { Object::set
 
 // -------------------
 
-Object::Ptr ObjectManager::getObject(unsigned long long id)
+Object::Ptr<> ObjectManager::getObject(unsigned long long id)
 {
     _compClass.setID(id);
     std::unordered_set<Object*>::iterator obj = _objects.find((Object*)&_compClass);
@@ -24,7 +24,17 @@ unsigned long long ObjectManager::getNumberOfObjects()
     return _objects.size();
 }
 
-Object::Ptr ObjectManager::addObject(Object* object)
+void ObjectManager::ClearDestroyQueue()
+{
+    for (Object::Ptr<>& obj: Object::_destroyQueue)
+    {
+        if (obj)
+            obj->_destroy(); // TODO the object ptr does not get reset when the object is destroyed
+    }
+    Object::_destroyQueue.clear();
+}
+
+Object::Ptr<> ObjectManager::addObject(Object* object)
 {
     _objects.insert({object});
     return object->getPtr();

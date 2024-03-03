@@ -1,4 +1,5 @@
 #include "Player.hpp"
+#include "Missile.hpp"
 
 const b2Vec2 Player::_size = {50, 25};
 sf::CircleShape Player::_shape;
@@ -53,42 +54,91 @@ void Player::Update(const float& deltaTime)
     
     if (WindowHandler::getRenderWindow()->hasFocus())
     {
-        b2Vec2 forward = this->getBody()->GetWorldPoint({_size.x/2,0});
-        forward -= this->getBody()->GetPosition();
+        b2Vec2 forward = this->getBody()->GetWorldPoint({_size.x/2,0}) - Object::getPosition();
         forward.Normalize();
 
-        if (sf::Keyboard::isKeyPressed((sf::Keyboard::W))){
-            forward.x *= 8000 * deltaTime;
-            forward.y *= 8000 * deltaTime;
-            this->getBody()->ApplyForceToCenter(forward, true);
-            _forwardBooster->emit();
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
+            applyForward(forward);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)){
+            applyBackward(forward);
         }
 
-        if (sf::Keyboard::isKeyPressed((sf::Keyboard::S))){
-            forward.x *= -7500 * deltaTime;
-            forward.y *= -7500 * deltaTime;
-            this->getBody()->ApplyForceToCenter(forward, true);
-            _backwardBooster->emit();
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)){
+            applyRightTurn();
         }
 
-        if (sf::Keyboard::isKeyPressed((sf::Keyboard::D))){
-            this->getBody()->ApplyForce({-100*deltaTime,0}, {0,_size.y/2}, true);
-            this->getBody()->ApplyForce({100*deltaTime,0}, {0,-_size.y/2}, true);
-            _rightBBooster->emit();
-            _rightFBooster->emit();
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)){
+            applyLeftTurn();
         }
 
-        if (sf::Keyboard::isKeyPressed((sf::Keyboard::A))){
-            this->getBody()->ApplyForce({100*deltaTime,0}, {0,_size.y/2}, true);
-            this->getBody()->ApplyForce({-100*deltaTime,0}, {0,-_size.y/2}, true);
-            _leftBBooster->emit();
-            _leftFBooster->emit();
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+        {
+            applyLeft(forward);
         }
 
-        // if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        // {
-        //     // _state.shoot = true;
-        // }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+        {
+            applyRight(forward);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        {
+            shoot();
+        }
+    }
+}
+
+void Player::applyForward(const b2Vec2& forward)
+{
+    this->getBody()->ApplyForceToCenter((85) * forward, true);
+    _forwardBooster->emit();
+}
+
+void Player::applyBackward(const b2Vec2& forward)
+{
+    this->getBody()->ApplyForceToCenter((-85) * forward, true);
+    _backwardBooster->emit();
+}
+
+void Player::applyLeftTurn()
+{
+    this->getBody()->ApplyForce({0,1}, {-_size.x/2,0}, true);
+    this->getBody()->ApplyForce({0,-1}, {_size.x/2,0}, true);
+    _leftBBooster->emit();
+    _leftFBooster->emit();
+}
+
+void Player::applyRightTurn()
+{
+    this->getBody()->ApplyForce({0,-1}, {-_size.x/2,0}, true);
+    this->getBody()->ApplyForce({0,1}, {_size.x/2,0}, true);
+    _rightBBooster->emit();
+    _rightFBooster->emit();
+}
+
+void Player::applyLeft(const b2Vec2& forward)
+{
+    b2Vec2 temp(forward.y, -forward.x);
+    this->getBody()->ApplyForceToCenter((75) * temp, true);
+    _leftFBooster->emit();
+    _rightBBooster->emit();
+}
+
+void Player::applyRight(const b2Vec2& forward)
+{
+    b2Vec2 temp(forward.y, -forward.x);
+    this->getBody()->ApplyForceToCenter((-75) * temp, true);
+    _leftBBooster->emit();
+    _rightFBooster->emit();
+}
+
+void Player::shoot()
+{
+    if (_shootCooldown >= 1)
+    {
+        _shootCooldown = 0.f;
+        new Missile(Object::getPosition(), Object::getRotation_b2(), this->getBody()->GetLinearVelocity(), 50.f);
     }
 }
 

@@ -8,72 +8,182 @@
 #include <list>
 
 #include "Utils/EventHelper.hpp"
+
 #include "box2d/b2_math.h"
 
-/// @brief used as a simple implementation of the pure virtual destroy function
-#define createDestroy() inline void destroy() override { delete(this); };
+class ObjectManager;
+
+/// @brief dont use this unless you know what you are doing
+/// @note this anything after this will be public unless specifying scope
+#define createDestroy() private: inline void _destroy() override { delete(this); } public:
 
 #define PI b2_pi
 
-/// @note the pure virtual "destroy" function only has to handle the destruction of the derived object
+/// @note the pure virtual "destroy" function must only handle the destruction of the derived object
 class Object
 {
 public:
+    template <typename T = Object, typename std::enable_if_t<std::is_base_of<Object, T>::value>* = nullptr>
     class Ptr
     {
     public:
-        Ptr(Object* obj);
-        ~Ptr();
-        Object* operator->();
-        const Object* operator->() const;
-        Object* operator*();
-        const Object* operator*() const;
-        Object::Ptr& operator=(const Object::Ptr& objectPtr);
-        explicit operator bool() const;
-        bool operator==(const Object::Ptr& objectPtr) const;
-        bool operator!=(const Object::Ptr& objectPtr) const;
-        bool operator<(const Object::Ptr& objectPtr) const;
-        bool operator>(const Object::Ptr& objectPtr) const;
-        bool operator==(Object* objectPtr) const;
-        bool operator!=(Object* objectPtr) const;
-        bool operator<(Object* objectPtr) const;
-        bool operator>(Object* objectPtr) const;
-        Object* get();
+        inline Ptr(T* obj)
+        {
+            this->set(obj);
+        }
+        
+        inline ~Ptr()
+        {
+            this->removePtr();
+        }
+        
+        inline T* operator->()
+        {
+            return _ptr;
+        }
+        
+        inline const T* operator->() const
+        {
+            return _ptr;
+        }
+        
+        inline T* operator*()
+        {
+            return _ptr;
+        }
+        
+        inline const T* operator*() const
+        {
+            return _ptr;
+        }
+        
+        inline Object::Ptr<T>& operator=(const Object::Ptr<T>& Ptr)
+        {
+            this->set(Ptr._ptr);
+            return *this;
+        }
+
+        inline Object::Ptr<T>& operator=(const T* Ptr)
+        {
+            this->set(Ptr._ptr);
+            return *this;
+        }
+        
+        /// @brief returns the value of isValid
+        inline explicit operator bool() const
+        {
+            return this->isValid();
+        }
+        
+        inline bool operator==(const Object::Ptr<T>& Ptr) const
+        {
+            return this->getID() == Ptr.getID();
+        }
+        
+        inline bool operator!=(const Object::Ptr<T>& Ptr) const
+        {
+            return this->getID() != Ptr.getID();
+        }
+        
+        inline bool operator<(const Object::Ptr<T>& Ptr) const
+        {
+            return this->getID() < Ptr.getID();
+        }
+        
+        inline bool operator>(const Object::Ptr<T>& Ptr) const
+        {
+            return this->getID() > Ptr.getID();
+        }
+        
+        inline bool operator==(T* Ptr) const
+        {
+            return this->getID() == (Ptr == nullptr ? 0 : Ptr->getID());
+        }
+        
+        inline bool operator!=(T* Ptr) const
+        {
+            return this->getID() != (Ptr == nullptr ? 0 : Ptr->getID());
+        }
+        
+        inline bool operator<(T* Ptr) const
+        {
+            return this->getID() < (Ptr == nullptr ? 0 : Ptr->getID());
+        }
+        
+        inline bool operator>(T* Ptr) const
+        {
+            return this->getID() > (Ptr == nullptr ? 0 : Ptr->getID());
+        }
+        
+        inline T* get()
+        {
+            return _ptr;
+        }
+        
         /// @brief if there is no ptr returns nullptr
         /// @returns obj or nullptr if no obj
-        const Object* get() const;
-        bool isValid() const;
+        inline const T* get() const
+        {
+            return _ptr;
+        }
+        
+        inline bool isValid() const
+        {
+            return (_ptr != nullptr);
+        }
+        
         /// @brief assigns which obj is stored in this ptr
-        /// @param obj the new obj
-        void setObject(Object* obj);
+        /// @param rawPtr the new ptr
+        inline void set(T* rawPtr)
+        {
+            this->removePtr();
+
+            if (rawPtr != nullptr)
+            {
+                _ptr = rawPtr;    
+                _eventID = _ptr->_onDestroy(Object::Ptr<T>::removePtr, this);
+            }
+        }
+        
         /// @brief if this is invalid then returns 0
-        /// @returns the id of the stored object
-        size_t getID() const;
+        /// @returns the id of the base Object class
+        inline size_t getID() const
+        {
+            return (this->_ptr == nullptr ? 0 : this->_ptr->getID());
+        }
 
     protected:
-        void removePtr();
+        inline void removePtr()
+        {
+            if (this->isValid())
+            {
+                _ptr->_onDestroy.disconnect(_eventID);
+            }
+            _ptr = nullptr;
+            _eventID = 0;
+        }
 
     private:
-        Object* _ptr = nullptr;
-        unsigned int _eventID = 0;
+        T* _ptr = nullptr;
+        size_t _eventID = 0;
     };
 
     Object();
     /// @brief Create an object as a child
     /// @note this will be faster than creating an object and setting it as a child
-    Object(Object::Ptr parent);
+    Object(Object::Ptr<> parent);
     ~Object();
 
     void setEnabled(bool enabled = true);
     bool isEnabled() const;
 
     unsigned long int getID() const;
-    Object::Ptr getPtr();
+    Object::Ptr<> getPtr();
 
     /// @brief if nullptr then no parent
-    void setParent(Object::Ptr parent);
+    void setParent(Object* parent);
     /// @brief if invalid then no parent
-    Object::Ptr getParent();
+    Object::Ptr<> getParent();
 
     /// @note if derived class, use the virtual function
     EventHelper::Event onEnabled;
@@ -107,8 +217,7 @@ public:
         return temp;
     }
 
-    /// @brief MUST be implemented in the final class which derives from object
-    virtual void destroy() = 0;
+    void destroy();
 
     /// @param vec global b2Vec2
     /// @returns the equivalent local b2Vec2
@@ -162,10 +271,6 @@ public:
     void rotate(const float& rot);
 
 protected:
-    /// @warning only use this if you know what you are doing
-    Object(unsigned long long id);
-    /// @warning only use this if you know what you are doing
-    void setID(unsigned long long id);
     inline virtual void OnEnable() {};
     inline virtual void OnDisable() {};
     /// @warning do NOT disconnect all EVER
@@ -178,8 +283,18 @@ protected:
     EventHelper::Event _onParentSet;
     /// @warning do NOT disconnect all EVER
     EventHelper::Event _onParentRemoved;
+    /// @brief adds this object to the destroy queue
+    /// @note same as using destroy
+    void _addToDestroyQueue();
 
 private:
+    /// @brief this should actually delete the object
+    virtual void _destroy() = 0;
+    /// @warning only use this if you know what you are doing
+    Object(unsigned long long id);
+    /// @warning only use this if you know what you are doing
+    void setID(unsigned long long id);
+
     void _addChild(Object* object);
     void _removeChild(Object* object);
 
@@ -189,10 +304,13 @@ private:
     // TODO make a renderer that uses this transform
     b2Transform _transform = b2Transform(b2Vec2(0,0), b2Rot(0));
 
-    Object::Ptr _parent = Object::Ptr(nullptr);
+    Object* _parent = nullptr;
     std::list<Object*> _children;
 
+    static std::list<Object::Ptr<>> _destroyQueue;
     static std::atomic_ullong _lastID;
+
+    friend ObjectManager;
 };
 
 class _objectComp

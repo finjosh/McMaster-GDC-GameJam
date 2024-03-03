@@ -24,28 +24,28 @@ using namespace sf;
 
 void addThemeCommands();
 
-class test : public virtual Object, public DrawableObject
-{
-public:
-    void Draw(sf::RenderWindow& window) override
-    {
-        sf::RectangleShape temp({20,20});
-        temp.setOrigin(10,10);
-        temp.setPosition({this->getPosition().x*PIXELS_PER_METER, this->getPosition().y*PIXELS_PER_METER});
-        temp.setRotation(this->getRotation()*180/b2_pi);
-        temp.setOutlineColor(sf::Color::Black);
-        temp.setOutlineThickness(1);
-        window.draw(temp);
-    }
+// class test : public virtual Object, public DrawableObject
+// {
+// public:
+//     void Draw(sf::RenderWindow& window) override
+//     {
+//         sf::RectangleShape temp({20,20});
+//         temp.setOrigin(10,10);
+//         temp.setPosition({this->getPosition().x*PIXELS_PER_METER, this->getPosition().y*PIXELS_PER_METER});
+//         temp.setRotation(this->getRotation()*180/b2_pi);
+//         temp.setOutlineColor(sf::Color::Black);
+//         temp.setOutlineThickness(1);
+//         window.draw(temp);
+//     }
 
-    createDestroy();
-};
+//     createDestroy();
+// };
 
 // TODO setup a view manager that handles windows size changes
 int main()
 {
     // setup for sfml and tgui
-    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Example Game", sf::Style::Fullscreen);
+    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Example Game" /*, sf::Style::Fullscreen*/);
     window.setFramerateLimit(60);
     WindowHandler::setRenderWindow(&window);
 
@@ -69,7 +69,8 @@ int main()
 
     //! ---------------------------------------------------
 
-    new Enemy(25,25, new Player(10,10));
+    auto temp = new Enemy(25,25, new Player(10,10));
+    temp->destroy();
 
     sf::View camera(sf::FloatRect{0,0,1920,1080});
     window.setView(camera);

@@ -78,21 +78,21 @@ public:
     b2Body* getBody();
     const b2Body* getBody() const;
 
-    /// @brief called after the time step so the body can be destroyed
+    /// @brief called when a contact begins
     /// @param collisionData the collision data
     inline virtual void BeginContact(CollisionData collisionData) {};
-    /// @brief called after the time step so the body can be destroyed
+    /// @brief called when a contact ends
     /// @param collisionData the collision data
     inline virtual void EndContact(CollisionData collisionData) {};
     /// @brief This can be called multiple times in one frame (called before the collision is handled)
     /// @note to get the collider get the userdata from the body and cast to Collider
-    /// @warning do not destroy the body during this call back
+    /// @warning do not destroy the body during this callback
     /// @param contact the contact data
     /// @param oldManifold the old manifold data
     inline virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) {};
     /// @brief This can be called multiple times in one frame (called after the collision is handled)
     /// @note to get the collider get the userdata from the body and cast to Collider
-    /// @warning do not destroy the body during this call back
+    /// @warning do not destroy the body during this callback
     /// @param contact the contact data
     /// @param impulse the impulse data
     inline virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
@@ -104,10 +104,10 @@ public:
 
 protected:
     /// @brief creates a body in the world with the default body def parameters
-    void initCollider(const float& x = 0, const float& y = 0);
+    void initCollider(const float& x = 0.f, const float& y = 0.f, const float& rot = 0.f);
     /// @brief create a body in the world with the default body def parameters
     /// @param pos the position to init the body at
-    void initCollider(const b2Vec2& pos);
+    void initCollider(const b2Vec2& pos, const b2Rot& rot = b2Rot(0));
     /// @brief create a body in the world with the given body def
     void initCollider(const b2BodyDef& bodyDef);
 

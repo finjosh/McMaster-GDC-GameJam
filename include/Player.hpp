@@ -21,6 +21,16 @@ public:
 
     createDestroy();
 
+    // TODO make a breaking function
+    void applyForward(const b2Vec2& forward);
+    void applyBackward(const b2Vec2& forward);
+    void applyLeftTurn();
+    void applyRightTurn();
+    void applyLeft(const b2Vec2& forward);
+    void applyRight(const b2Vec2& forward);
+    /// @brief attempts to shoot a missile
+    void shoot();
+
 protected:
     virtual void Update(const float& deltaTime) override;
     virtual void LateDraw(sf::RenderWindow& window) override;
@@ -29,7 +39,6 @@ protected:
     void EndContact(CollisionData collisionData) override;
 
 private:
-    // TODO make a const for the cool downs and change these to timers
     float _shootCooldown = 0.f;
     ParticleEmitter* _forwardBooster = nullptr;
     ParticleEmitter* _backwardBooster = nullptr;

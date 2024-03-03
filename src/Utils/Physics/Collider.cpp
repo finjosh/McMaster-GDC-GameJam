@@ -77,16 +77,17 @@ b2Fixture* Collider::createFixtureSensor(const b2Shape& shape, const float& dens
     return _body->CreateFixture(&def);
 }
 
-void Collider::initCollider(const b2Vec2& pos)
+void Collider::initCollider(const b2Vec2& pos, const b2Rot& rot)
 {
-    this->initCollider(pos.x, pos.y);
+    this->initCollider(pos.x, pos.y, rot.GetAngle());
 }
 
-void Collider::initCollider(const float& x, const float& y)
+void Collider::initCollider(const float& x, const float& y, const float& rot)
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
     bodyDef.position.Set(x,y);
+    bodyDef.angle = rot;
     this->initCollider(bodyDef);
 }
 

@@ -11,12 +11,16 @@ class ObjectManager
 {
 public:
     /// @returns nullptr if the object does not exist 
-    static Object::Ptr getObject(unsigned long long id);
+    static Object::Ptr<> getObject(unsigned long long id);
 
     static unsigned long long getNumberOfObjects();
 
+    /// @brief destroys all the objects in the queue
+    /// @note only use this if you know what you are doing
+    static void ClearDestroyQueue();
+
 protected:
-    static Object::Ptr addObject(Object* object);
+    static Object::Ptr<> addObject(Object* object);
     static void removeObject(Object* object);
 
     friend Object;

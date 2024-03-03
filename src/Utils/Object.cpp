@@ -6,130 +6,8 @@ bool _objectComp::operator()(const Object* lhs, const Object* rhs) const
     return lhs->getID() < rhs->getID();
 }
 
+std::list<Object::Ptr<>> Object::_destroyQueue;
 std::atomic_ullong Object::_lastID = 1;
-
-Object::Ptr::Ptr(Object* obj)
-{
-    this->setObject(obj);
-}
-
-Object::Ptr::~Ptr()
-{
-    if (isValid())
-    {
-        _ptr->_onDestroy.disconnect(_eventID);
-    }
-}
-
-Object* Object::Ptr::operator->()
-{
-    return _ptr;
-}
-
-const Object* Object::Ptr::operator->() const
-{
-    return _ptr;
-}
-
-Object* Object::Ptr::operator*()
-{
-    return _ptr;
-}
-
-const Object* Object::Ptr::operator*() const
-{
-    return _ptr;
-}
-
-Object::Ptr::operator bool() const
-{
-    return this->isValid();
-}
-
-Object::Ptr& Object::Ptr::operator=(const Object::Ptr& objectPtr)
-{
-    this->setObject(objectPtr._ptr);
-    return *this;
-}
-
-bool Object::Ptr::operator==(const Object::Ptr& objectPtr) const
-{
-    return this->getID() == objectPtr.getID();
-}
-
-bool Object::Ptr::operator!=(const Object::Ptr& objectPtr) const
-{
-    return this->getID() != objectPtr.getID();
-}
-
-bool Object::Ptr::operator<(const Object::Ptr& objectPtr) const
-{
-    return this->getID() < objectPtr.getID();
-}
-
-bool Object::Ptr::operator>(const Object::Ptr& objectPtr) const
-{
-    return this->getID() > objectPtr.getID();
-}
-
-bool Object::Ptr::operator==(Object* object) const
-{
-    return *this == Object::Ptr(object);
-}
-
-bool Object::Ptr::operator!=(Object* object) const
-{
-    return *this != Object::Ptr(object);
-}
-
-bool Object::Ptr::operator<(Object* object) const
-{
-    return *this < Object::Ptr(object);
-}
-
-bool Object::Ptr::operator>(Object* object) const
-{
-    return *this > Object::Ptr(object);
-}
-
-Object* Object::Ptr::get()
-{
-    return _ptr;
-}
-
-const Object* Object::Ptr::get() const
-{
-    return _ptr;
-}
-
-bool Object::Ptr::isValid() const
-{
-    return (_ptr != nullptr);
-}
-
-void Object::Ptr::setObject(Object* obj)
-{
-    if (this->isValid())
-    {
-        _ptr->_onDestroy.disconnect(_eventID);
-        _ptr = nullptr;
-    }
-
-    _ptr = obj;
-    if (_ptr != nullptr)
-        _eventID = _ptr->_onDestroy(Object::Ptr::removePtr, this);
-}
-
-void Object::Ptr::removePtr()
-{
-    _ptr = nullptr;
-    _eventID = 0;
-}
-
-size_t Object::Ptr::getID() const
-{
-    return (this->_ptr == nullptr ? 0 : this->_ptr->getID());
-}
 
 Object::Object()
 {
@@ -152,18 +30,25 @@ Object::~Object()
 
     ObjectManager::removeObject(this);
     
-    if (_parent.isValid())
+    if (_parent != nullptr)
     {
         _parent->_removeChild(this);
     }
     
-    for (auto child: _children)
+    auto child = _children.begin(); // ? issues from here
+    while (child != _children.end())
     {
-        child->destroy();
+        auto temp = child++;
+        (*temp)->_destroy();
     }
 
     _onDestroy.invoke();
     onDestroy.invoke();
+}
+
+void Object::destroy()
+{
+    _addToDestroyQueue();
 }
 
 void Object::setEnabled(bool enabled)
@@ -191,24 +76,24 @@ unsigned long int Object::getID() const
     return _id;
 }
 
-Object::Ptr Object::getPtr()
+Object::Ptr<> Object::getPtr()
 {
-    return Object::Ptr(this);
+    return Object::Ptr<>(this);
 }
 
-void Object::setParent(Object::Ptr parent)
+void Object::setParent(Object* parent)
 {
     if (parent == this)
         return;
 
-    if (_parent.isValid())
+    if (_parent != nullptr)
     {
         _parent->_removeChild(this);
     }
 
     _parent = parent;
     // if not valid have no parent
-    if (parent.isValid())
+    if (parent != nullptr)
     {
         parent->_addChild(this);
         _onParentSet.invoke();
@@ -221,7 +106,7 @@ void Object::setParent(Object::Ptr parent)
     }
 }
 
-Object::Ptr Object::getParent()
+Object::Ptr<> Object::getParent()
 {
     return _parent;
 }
@@ -384,4 +269,9 @@ void Object::_removeChild(Object* object)
 {
     if (object == nullptr) return;
     _children.remove_if([object](const Object* obj){ return obj == object; });
+}
+
+void Object::_addToDestroyQueue()
+{
+    _destroyQueue.push_back({this});
 }

@@ -16,15 +16,15 @@
 class Enemy : public sf::RectangleShape, public GameObject, public Collider
 {
 public:
-    Enemy(const float& x, const float& y, const Object::Ptr target);
+    Enemy(const float& x, const float& y, const Object::Ptr<> target);
     ~Enemy();
 
     createDestroy();
 
-    void applyForward(b2Vec2 forward, const float& deltaTime);
-    void applyBackward(b2Vec2 forward, const float& deltaTime);
-    void applyLeft(const float& deltaTime);
-    void applyRight(const float& deltaTime);
+    void applyForward(const b2Vec2& forward);
+    void applyBackward(const b2Vec2& forward);
+    void applyLeftTurn();
+    void applyRightTurn();
 
 protected:
     virtual void Update(const float& deltaTime) override;
@@ -43,7 +43,7 @@ private:
     ParticleEmitter* _rightFBooster = nullptr;
     ParticleEmitter* _rightBBooster = nullptr;
 
-    Object::Ptr _target = nullptr;
+    Object::Ptr<> _target = nullptr;
 
     static const b2Vec2 _size;
     static sf::CircleShape _shape;

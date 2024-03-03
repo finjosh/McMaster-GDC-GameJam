@@ -1,4 +1,5 @@
 #include "Utils/UpdateManager.hpp"
+#include "Utils/ObjectManager.hpp"
 
 std::unordered_set<UpdateInterface*> UpdateManager::_objects;
 
@@ -23,6 +24,8 @@ void UpdateManager::Update(float deltaTime)
         if (temp->isEnabled())
             temp->Update(deltaTime);
     }
+
+    ObjectManager::ClearDestroyQueue();
 }
 
 void UpdateManager::LateUpdate(float deltaTime)
@@ -36,6 +39,8 @@ void UpdateManager::LateUpdate(float deltaTime)
         if (temp->isEnabled())
             temp->LateUpdate(deltaTime);
     }
+
+    ObjectManager::ClearDestroyQueue();
 }
 
 void UpdateManager::FixedUpdate()
@@ -49,6 +54,8 @@ void UpdateManager::FixedUpdate()
         if (temp->isEnabled())
             temp->FixedUpdate();
     }
+
+    ObjectManager::ClearDestroyQueue();
 }
 
 void UpdateManager::Start()

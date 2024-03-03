@@ -25,12 +25,15 @@ public:
 
 protected:
     static void addCollider(Collider* Collider);
-    static void removeCollider(Collider* Collider);
+    static void removeCollider(Collider* collider);
     
     friend Collider;
 
 private:
     static std::unordered_set<Collider*> _objects;
+    // TODO find a better way than using Object::Ptr
+    // static std::list<std::pair<Object::Ptr<Collider>, CollisionData>> _beginContact; // TODO optimize this by adding the b2Contact data and handling the rest in the update
+    // static std::list<std::pair<Object::Ptr<Collider>, CollisionData>> _endContact; // TODO optimize this by adding the b2Contact data and handling the rest in the update
 };
 
 #endif
