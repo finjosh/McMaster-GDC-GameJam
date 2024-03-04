@@ -69,7 +69,7 @@ int main()
 
     //! ---------------------------------------------------
 
-    auto temp = new Enemy(25,25, new Player(10,10));
+    auto temp = new Enemy(25,25, {new Player(10,10)});
     temp->destroy();
 
     sf::View camera(sf::FloatRect{0,0,1920,1080});

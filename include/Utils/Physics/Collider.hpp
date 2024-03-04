@@ -28,7 +28,6 @@ private:
     b2Fixture* _otherFixture;
 };
 
-// TODO add the ability to disable only collisions
 // TODO completely hide all body functions unless they are needed
 /// @note do not use body user data as that stores this collider
 class Collider : public virtual Object
@@ -37,7 +36,7 @@ public:
     Collider();
     ~Collider();
 
-    /// @brief sets only physics enabled or not ignores the object state
+    /// @brief sets only physics enabled or disabled, ignores the object state
     /// @note if disabled object state does not matter if enabled physics will follow object state
     void setPhysicsEnabled(const bool& enabled = true);
     /// @returns true if physics are enabled

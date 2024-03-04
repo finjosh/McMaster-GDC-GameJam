@@ -11,7 +11,6 @@
 
 #include "Utils/Physics/Collider.hpp"
 
-// TODO make begin and end contact be called after the box2d update function so objects can delete themselves during the callback
 class CollisionManager : public b2ContactListener
 {
 public:

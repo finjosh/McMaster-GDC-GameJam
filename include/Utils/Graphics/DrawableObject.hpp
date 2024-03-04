@@ -17,7 +17,6 @@ struct _drawableComp
     bool operator() (const DrawableObject* lhs, const DrawableObject* rhs) const;
 };
 
-// TODO make a children draw method for better drawing
 class DrawableObject : public virtual Object
 {
 public:

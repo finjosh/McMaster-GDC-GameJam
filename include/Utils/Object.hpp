@@ -24,7 +24,7 @@ class Object
 {
 public:
     template <typename T = Object, typename std::enable_if_t<std::is_base_of<Object, T>::value>* = nullptr>
-    class Ptr
+    class Ptr // TODO this no worky
     {
     public:
         inline Ptr(T* obj)

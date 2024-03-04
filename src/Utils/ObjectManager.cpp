@@ -29,7 +29,9 @@ void ObjectManager::ClearDestroyQueue()
     for (Object::Ptr<>& obj: Object::_destroyQueue)
     {
         if (obj)
-            obj->_destroy(); // TODO the object ptr does not get reset when the object is destroyed
+        {
+            obj->_destroy();
+        }
     }
     Object::_destroyQueue.clear();
 }

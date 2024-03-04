@@ -16,7 +16,7 @@
 class Enemy : public sf::RectangleShape, public GameObject, public Collider
 {
 public:
-    Enemy(const float& x, const float& y, const Object::Ptr<> target);
+    Enemy(const float& x, const float& y, Object::Ptr<> target);
     ~Enemy();
 
     createDestroy();

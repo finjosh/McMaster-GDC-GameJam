@@ -35,7 +35,7 @@ Object::~Object()
         _parent->_removeChild(this);
     }
     
-    auto child = _children.begin(); // ? issues from here
+    auto child = _children.begin();
     while (child != _children.end())
     {
         auto temp = child++;

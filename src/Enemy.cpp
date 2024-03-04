@@ -3,7 +3,7 @@
 const b2Vec2 Enemy::_size = {50, 25};
 sf::CircleShape Enemy::_shape;
 
-Enemy::Enemy(const float& x, const float& y, const Object::Ptr<> target) : DrawableObject(0), _target(target)
+Enemy::Enemy(const float& x, const float& y, Object::Ptr<> target) : DrawableObject(0), _target(target.get())
 {
     _shape.setFillColor(sf::Color::Red);
     _shape.setRadius(5);
