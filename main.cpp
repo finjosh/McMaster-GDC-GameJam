@@ -148,6 +148,15 @@ int main()
             new Enemy(rand()%window.getSize().x/PIXELS_PER_METER, rand()%window.getSize().y/PIXELS_PER_METER, player);
         }
 
+        if (player) // TODO finish this
+        {
+            // move the camera toward the player
+            b2Vec2 pos = player->getPosition();
+            camera.setCenter({window.getView().getSize().x/2 - pos.x * PIXELS_PER_METER / pos.LengthSquared(), 
+                                window.getView().getSize().y/2 - pos.y * PIXELS_PER_METER / pos.LengthSquared()});
+            window.setView(camera);
+        }
+
         // ---------------
 
         DrawableManager::draw(window);

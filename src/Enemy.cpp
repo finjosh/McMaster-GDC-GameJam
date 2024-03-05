@@ -12,11 +12,6 @@ Enemy::Enemy(const float& x, const float& y, Object::Ptr<> target) : DrawableObj
     b2PolygonShape b2shape;
     b2shape.SetAsBox(_size.x/PIXELS_PER_METER/2.0, _size.y/PIXELS_PER_METER/2.0);
 
-    Collider::initCollider(x,y);
-    Collider::createFixture(b2shape, 1, 0.25);
-    Collider::getBody()->SetLinearDamping(0.25);
-    Collider::getBody()->SetAngularDamping(0.50);
-
     RectangleShape::setSize({_size.x,_size.y});
     RectangleShape::setOrigin(_size.x/2,_size.y/2);
     RectangleShape::setPosition(x,y);
@@ -34,6 +29,11 @@ Enemy::Enemy(const float& x, const float& y, Object::Ptr<> target) : DrawableObj
     _leftBBooster->setParent(this);
     _rightFBooster->setParent(this);
     _rightBBooster->setParent(this);
+
+    Collider::initCollider(x,y);
+    Collider::createFixture(b2shape, 1, 0.25);
+    Collider::getBody()->SetLinearDamping(0.25);
+    Collider::getBody()->SetAngularDamping(0.50);
 }
 
 Enemy::~Enemy()

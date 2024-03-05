@@ -10,6 +10,15 @@ Missile::Missile(const b2Vec2& position, const b2Rot& rotation, const b2Vec2& st
     _shape.setRadius(4);
     _shape.setOrigin(2,2);
 
+    RectangleShape::setSize({_size.x,_size.y});
+    RectangleShape::setOrigin(_size.x/2,_size.y/2);
+    RectangleShape::setFillColor({128,128,128,255});
+
+    //! NOTE this position is hard coded make sure to update when updating size
+    _booster = new ParticleEmitter(&_shape, {-1.25,0}, 20, PI, 0.01, 0.15, 2, 0.3, 35, {0,0,100,0});
+    _booster->setParent(this);
+    _booster->setSpawning();
+
     b2PolygonShape b2shape;
     b2shape.SetAsBox(_size.x/PIXELS_PER_METER/2.0, _size.y/PIXELS_PER_METER/2.0);
 
@@ -19,15 +28,6 @@ Missile::Missile(const b2Vec2& position, const b2Rot& rotation, const b2Vec2& st
     Collider::getBody()->SetAngularDamping(0.50);
     Collider::getBody()->SetBullet(true);
     Collider::getBody()->SetLinearVelocity(startingVel);
-
-    RectangleShape::setSize({_size.x,_size.y});
-    RectangleShape::setOrigin(_size.x/2,_size.y/2);
-    RectangleShape::setFillColor({128,128,128,255});
-
-    //! NOTE this position is hard coded make sure to update when updating size
-    _booster = new ParticleEmitter(&_shape, {-1.25,0}, 20, PI, 0.01, 0.15, 2, 0.3, 35, {0,0,100,0});
-    _booster->setParent(this);
-    _booster->setSpawning();
 }
 
 void Missile::Update(const float& deltaTime) 

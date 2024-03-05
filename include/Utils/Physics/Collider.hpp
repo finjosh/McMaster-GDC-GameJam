@@ -29,6 +29,7 @@ private:
 };
 
 // TODO completely hide all body functions unless they are needed
+// TODO refactor for easier to use code
 /// @note do not use body user data as that stores this collider
 class Collider : public virtual Object
 {
