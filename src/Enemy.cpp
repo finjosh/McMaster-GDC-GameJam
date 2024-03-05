@@ -22,12 +22,12 @@ Enemy::Enemy(const float& x, const float& y, Object::Ptr<> target) : DrawableObj
     RectangleShape::setPosition(x,y);
     RectangleShape::setFillColor({100,50,50,255});
 
-    _forwardBooster = new ParticleEmitter(&_shape, {-2.5,0}, 35, b2_pi, 0.1, 0.15, 5, 0.1, 25, {0,0,100,0});
-    _backwardBooster = new ParticleEmitter(&_shape, {2.5,0}, 35, 0, 0.1, 0.15, 5, 0.1, 25, {0,0,100,0});
-    _leftFBooster = new ParticleEmitter(&_shape, {2,1.25}, 35, b2_pi/2, 0.1, 0.15, 5, 0.1, 25, {0,0,100,0});
-    _leftBBooster = new ParticleEmitter(&_shape, {-2,-1.25}, 35, -b2_pi/2, 0.1, 0.15, 5, 0.1, 25, {0,0,100,0});
-    _rightFBooster = new ParticleEmitter(&_shape, {2,-1.25}, 35, -b2_pi/2, 0.1, 0.15, 5, 0.1, 25, {0,0,100,0});
-    _rightBBooster = new ParticleEmitter(&_shape, {-2,1.25}, 35, b2_pi/2, 0.1, 0.15, 5, 0.1, 25, {0,0,100,0});
+    _forwardBooster = new ParticleEmitter(&_shape, {-2.5,0}, 35, b2_pi, 0.1, 0.15, 2, 0.2, 35, {0,0,100,0});
+    _backwardBooster = new ParticleEmitter(&_shape, {2.5,0}, 35, 0, 0.1, 0.15, 2, 0.2, 35, {0,0,100,0});
+    _leftFBooster = new ParticleEmitter(&_shape, {2,1.25}, 35, b2_pi/2, 0.1, 0.15, 2, 0.2, 35, {0,0,100,0});
+    _leftBBooster = new ParticleEmitter(&_shape, {-2,-1.25}, 35, -b2_pi/2, 0.1, 0.15, 2, 0.2, 35, {0,0,100,0});
+    _rightFBooster = new ParticleEmitter(&_shape, {2,-1.25}, 35, -b2_pi/2, 0.1, 0.15, 2, 0.2, 35, {0,0,100,0});
+    _rightBBooster = new ParticleEmitter(&_shape, {-2,1.25}, 35, b2_pi/2, 0.1, 0.15, 2, 0.2, 35, {0,0,100,0});
     _forwardBooster->setParent(this);
     _backwardBooster->setParent(this);
     _leftFBooster->setParent(this);

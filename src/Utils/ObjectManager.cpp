@@ -26,11 +26,11 @@ unsigned long long ObjectManager::getNumberOfObjects()
 
 void ObjectManager::ClearDestroyQueue()
 {
-    for (Object::Ptr<>& obj: Object::_destroyQueue)
+    for (std::list<Object::Ptr<>>::iterator obj = Object::_destroyQueue.begin(); obj != Object::_destroyQueue.end(); obj++)
     {
-        if (obj)
+        if (*obj)
         {
-            obj->_destroy();
+            (*obj)->_destroy();
         }
     }
     Object::_destroyQueue.clear();

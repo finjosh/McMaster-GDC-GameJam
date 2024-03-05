@@ -273,5 +273,5 @@ void Object::_removeChild(Object* object)
 
 void Object::_addToDestroyQueue()
 {
-    _destroyQueue.push_back({this});
+    _destroyQueue.emplace_back(this);
 }

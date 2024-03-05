@@ -3,8 +3,6 @@
 #include "Utils/ObjectManager.hpp"
 
 std::unordered_set<Collider*> CollisionManager::_objects;
-// std::list<std::pair<Object::Ptr<Collider>, CollisionData>> CollisionManager::_beginContact;
-// std::list<std::pair<Object::Ptr<Collider>, CollisionData>> CollisionManager::_endContact;
 
 void CollisionManager::BeginContact(b2Contact* contact)
 {
@@ -13,12 +11,10 @@ void CollisionManager::BeginContact(b2Contact* contact)
     if (A != nullptr)
     {
         A->BeginContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
-        // _beginContact.push_back({A,{B, contact->GetFixtureA(), contact->GetFixtureB()}});
     }
     if (B != nullptr)
     {
         B->BeginContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
-        // _beginContact.push_back({B,{A, contact->GetFixtureB(), contact->GetFixtureA()}});
     }
 }
 
@@ -29,12 +25,10 @@ void CollisionManager::EndContact(b2Contact* contact)
     if (A != nullptr)
     {
         A->EndContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
-        // _endContact.push_back({A,{B, contact->GetFixtureA(), contact->GetFixtureB()}});
     }
     if (B != nullptr)
     {
         B->EndContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
-        // _endContact.push_back({B,{A, contact->GetFixtureB(), contact->GetFixtureA()}});
     }
 }
 
@@ -72,25 +66,6 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
 
 void CollisionManager::Update()
 {
-    // // TODO do this better (without Object::Ptr<Collider>)
-    // for (auto data: _beginContact)
-    // {
-    //     if (data.first)
-    //     {
-    //         data.first->BeginContact(data.second);
-    //     }
-    // }
-    // _beginContact.clear();
-
-    // for (auto data: _endContact)
-    // {
-    //     if (data.first)
-    //     {
-    //         data.first->EndContact(data.second);
-    //     }
-    // }
-    // _endContact.clear();
-
     ObjectManager::ClearDestroyQueue();
 
     for (auto obj: _objects)

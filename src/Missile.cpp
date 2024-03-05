@@ -25,7 +25,7 @@ Missile::Missile(const b2Vec2& position, const b2Rot& rotation, const b2Vec2& st
     RectangleShape::setFillColor({128,128,128,255});
 
     //! NOTE this position is hard coded make sure to update when updating size
-    _booster = new ParticleEmitter(&_shape, {-1.25,0}, 20, PI, 0.01, 0.15, 3, 0.1, 35, {0,0,100,0});
+    _booster = new ParticleEmitter(&_shape, {-1.25,0}, 20, PI, 0.01, 0.15, 2, 0.3, 35, {0,0,100,0});
     _booster->setParent(this);
     _booster->setSpawning();
 }

@@ -24,16 +24,25 @@ class Object
 {
 public:
     template <typename T = Object, typename std::enable_if_t<std::is_base_of<Object, T>::value>* = nullptr>
-    class Ptr // TODO this no worky
+    class Ptr
     {
     public:
         inline Ptr(T* obj)
         {
             this->set(obj);
         }
+
+        inline Ptr(Ptr& ptr) 
+        {
+            this->set(ptr.get());
+        }
         
         inline ~Ptr()
         {
+            if (this->isValid())
+            {
+                _ptr->_onDestroy.disconnect(_eventID);
+            }
             this->removePtr();
         }
         
@@ -136,6 +145,10 @@ public:
         /// @param rawPtr the new ptr
         inline void set(T* rawPtr)
         {
+            if (this->isValid())
+            {
+                _ptr->_onDestroy.disconnect(_eventID);
+            }
             this->removePtr();
 
             if (rawPtr != nullptr)
@@ -155,15 +168,13 @@ public:
     protected:
         inline void removePtr()
         {
-            if (this->isValid())
-            {
-                _ptr->_onDestroy.disconnect(_eventID);
-            }
             _ptr = nullptr;
             _eventID = 0;
         }
 
     private:
+        inline Ptr(const Ptr& ptr) = default;
+
         T* _ptr = nullptr;
         size_t _eventID = 0;
     };

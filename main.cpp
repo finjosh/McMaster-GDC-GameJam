@@ -69,8 +69,8 @@ int main()
 
     //! ---------------------------------------------------
 
-    auto temp = new Enemy(25,25, {new Player(10,10)});
-    temp->destroy();
+    Object::Ptr<> player = new Player(10,10);
+    new Enemy(25,25, player);
 
     sf::View camera(sf::FloatRect{0,0,1920,1080});
     window.setView(camera);
@@ -78,6 +78,7 @@ int main()
     UpdateManager::Start();
     sf::Clock deltaClock;
     float fixedUpdate = 0;
+    sf::Clock timer;
     while (window.isOpen())
     {
         EventHelper::Event::ThreadSafe::update();
@@ -120,6 +121,12 @@ int main()
         //! Draw after this
 
         //* Write code here
+
+        if (timer.getElapsedTime().asSeconds() >= 5)
+        {
+            timer.restart();
+            new Enemy(rand()%window.getSize().x/PIXELS_PER_METER, rand()%window.getSize().y/PIXELS_PER_METER, player);
+        }
 
         // ---------------
 
