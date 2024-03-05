@@ -89,28 +89,28 @@ void Enemy::Update(const float& deltaTime)
 
 void Enemy::applyForward(const b2Vec2& forward)
 {
-    this->getBody()->ApplyForceToCenter((85) * forward, true);
+    this->getBody()->ApplyForceToCenter((95) * forward, true);
     _forwardBooster->emit();
 }
 
 void Enemy::applyBackward(const b2Vec2& forward)
 {
-    this->getBody()->ApplyForceToCenter((-85) * forward, true);
+    this->getBody()->ApplyForceToCenter((-95) * forward, true);
     _backwardBooster->emit();
 }
 
 void Enemy::applyLeftTurn()
 {
-    this->getBody()->ApplyForce({0,1}, {-_size.x/2,0}, true);
-    this->getBody()->ApplyForce({0,-1}, {_size.x/2,0}, true);
+    this->getBody()->ApplyForce({0,2}, {-_size.x/2,0}, true);
+    this->getBody()->ApplyForce({0,-2}, {_size.x/2,0}, true);
     _leftBBooster->emit();
     _leftFBooster->emit();
 }
 
 void Enemy::applyRightTurn()
 {
-    this->getBody()->ApplyForce({0,-1}, {-_size.x/2,0}, true);
-    this->getBody()->ApplyForce({0,1}, {_size.x/2,0}, true);
+    this->getBody()->ApplyForce({0,-2}, {-_size.x/2,0}, true);
+    this->getBody()->ApplyForce({0,2}, {_size.x/2,0}, true);
     _rightBBooster->emit();
     _rightFBooster->emit();
 }

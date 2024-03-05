@@ -24,22 +24,21 @@ using namespace sf;
 
 void addThemeCommands();
 
-// class test : public virtual Object, public DrawableObject
-// {
-// public:
-//     void Draw(sf::RenderWindow& window) override
-//     {
-//         sf::RectangleShape temp({20,20});
-//         temp.setOrigin(10,10);
-//         temp.setPosition({this->getPosition().x*PIXELS_PER_METER, this->getPosition().y*PIXELS_PER_METER});
-//         temp.setRotation(this->getRotation()*180/b2_pi);
-//         temp.setOutlineColor(sf::Color::Black);
-//         temp.setOutlineThickness(1);
-//         window.draw(temp);
-//     }
+class Wall : public virtual Object, public Collider
+{
+public:
+    Wall(const b2Vec2& pos, const b2Vec2& size)
+    {
+        b2PolygonShape b2shape;
+        b2shape.SetAsBox(size.x/2, size.y/2);
 
-//     createDestroy();
-// };
+        Collider::initCollider(pos.x,pos.y);
+        Collider::createFixture(b2shape, 1, 0.25);
+        Collider::getBody()->SetType(b2BodyType::b2_staticBody);
+    }
+
+    createDestroy();
+};
 
 // TODO setup a view manager that handles windows size changes
 int main()
@@ -48,6 +47,8 @@ int main()
     sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Example Game" /*, sf::Style::Fullscreen*/);
     window.setFramerateLimit(60);
     WindowHandler::setRenderWindow(&window);
+    sf::View camera(sf::FloatRect{0,0,1920,1080});
+    window.setView(camera); // TODO make camera its own class
 
     tgui::Gui gui{window};
     gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
@@ -69,16 +70,26 @@ int main()
 
     //! ---------------------------------------------------
 
+    // TODO make this a little bigger and have the camera follow the player a little
+    // creating walls 
+    new Wall({window.getView().getSize().x/PIXELS_PER_METER/2.f, -10},{window.getView().getSize().x/PIXELS_PER_METER, 20});
+    new Wall({window.getView().getSize().x/PIXELS_PER_METER/2.f, window.getView().getSize().y/PIXELS_PER_METER + 10},{window.getView().getSize().x/PIXELS_PER_METER, 20});
+    new Wall({-10, window.getView().getSize().y/PIXELS_PER_METER/2.f},{20, window.getView().getSize().y/PIXELS_PER_METER});
+    new Wall({window.getView().getSize().x/PIXELS_PER_METER + 10, window.getView().getSize().y/PIXELS_PER_METER/2.f},{20, window.getView().getSize().y/PIXELS_PER_METER});
+    // --------------
+
     Object::Ptr<> player = new Player(10,10);
     new Enemy(25,25, player);
-
-    sf::View camera(sf::FloatRect{0,0,1920,1080});
-    window.setView(camera);
 
     UpdateManager::Start();
     sf::Clock deltaClock;
     float fixedUpdate = 0;
     sf::Clock timer;
+    int frames = 0;
+    int fps = 0;
+    auto fpsLabel = tgui::Label::create("0");
+    gui.add(fpsLabel);
+    float secondTimer = 0;
     while (window.isOpen())
     {
         EventHelper::Event::ThreadSafe::update();
@@ -86,6 +97,15 @@ int main()
         // updating the delta time var
         sf::Time deltaTime = deltaClock.restart();
         fixedUpdate += deltaTime.asSeconds();
+        secondTimer += deltaTime.asSeconds();
+        frames++;
+        if (secondTimer >= 1)
+        {
+            fps = frames;
+            frames = 0;
+            secondTimer = 0;
+            fpsLabel->setText(std::to_string(fps));
+        }
         sf::Event event;
         while (window.pollEvent(event))
         {

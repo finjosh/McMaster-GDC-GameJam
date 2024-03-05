@@ -47,7 +47,7 @@ DEPFILES=$(patsubst %.o,%.d,$(OBJECTS))
 OUTPATHS:=$(foreach d,$(filter-out ./,$(SRCDIRS)),$(OBJ_O_DIR)/$(d)/)
 
 # so there is no file that gets mistaked with the tasks listed
-.PHONY = all info clean libs dirs
+.PHONY = all info clean libs dirs run
 
 # compiler to use
 CC=g++
@@ -75,6 +75,9 @@ $(OBJ_O_DIR)/%.o:%.cpp
 
 $(OBJ_O_DIR)/%/:
 	$(call makeDir,$(patsubst %/,%,$@))
+
+run: all
+	$(shell ./$(PROJECT))
 
 # shell command for removing a dir
 RMDIR:=rmdir /s /q
