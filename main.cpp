@@ -24,10 +24,10 @@ using namespace sf;
 
 void addThemeCommands();
 
-class Wall : public virtual Object, public Collider
+class Wall : public virtual Object, public Collider, public DrawableObject, public sf::RectangleShape
 {
 public:
-    Wall(const b2Vec2& pos, const b2Vec2& size)
+    inline Wall(const b2Vec2& pos, const b2Vec2& size)
     {
         b2PolygonShape b2shape;
         b2shape.SetAsBox(size.x/2, size.y/2);
@@ -35,6 +35,17 @@ public:
         Collider::initCollider(pos.x,pos.y);
         Collider::createFixture(b2shape, 1, 0.25);
         Collider::getBody()->SetType(b2BodyType::b2_staticBody);
+
+        RectangleShape::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
+        RectangleShape::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
+        RectangleShape::setFillColor(sf::Color::Red);
+    }
+
+    inline virtual void Draw(sf::RenderWindow& window) override
+    {
+        RectangleShape::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
+        RectangleShape::setRotation(Object::getRotation()*180/PI);
+        window.draw(*this);
     }
 
     createDestroy();
@@ -44,7 +55,7 @@ public:
 int main()
 {
     // setup for sfml and tgui
-    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Example Game" /*, sf::Style::Fullscreen*/);
+    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Example Game", sf::Style::Fullscreen);
     window.setFramerateLimit(60);
     WindowHandler::setRenderWindow(&window);
     sf::View camera(sf::FloatRect{0,0,1920,1080});
@@ -70,15 +81,8 @@ int main()
 
     //! ---------------------------------------------------
 
-    // TODO make this a little bigger and have the camera follow the player a little
-    // creating walls 
-    new Wall({window.getView().getSize().x/PIXELS_PER_METER/2.f, -10},{window.getView().getSize().x/PIXELS_PER_METER, 20});
-    new Wall({window.getView().getSize().x/PIXELS_PER_METER/2.f, window.getView().getSize().y/PIXELS_PER_METER + 10},{window.getView().getSize().x/PIXELS_PER_METER, 20});
-    new Wall({-10, window.getView().getSize().y/PIXELS_PER_METER/2.f},{20, window.getView().getSize().y/PIXELS_PER_METER});
-    new Wall({window.getView().getSize().x/PIXELS_PER_METER + 10, window.getView().getSize().y/PIXELS_PER_METER/2.f},{20, window.getView().getSize().y/PIXELS_PER_METER});
-    // --------------
-
-    Object::Ptr<> player = new Player(10,10);
+    Object::Ptr<> player = new Player(10,10,10);
+    camera.setCenter(player->getPosition().x*PIXELS_PER_METER, player->getPosition().y*PIXELS_PER_METER);
     new Enemy(25,25, player);
 
     UpdateManager::Start();
@@ -142,19 +146,20 @@ int main()
 
         //* Write code here
 
-        if (timer.getElapsedTime().asSeconds() >= 5)
-        {
-            timer.restart();
-            new Enemy(rand()%window.getSize().x/PIXELS_PER_METER, rand()%window.getSize().y/PIXELS_PER_METER, player);
-        }
-
-        if (player) // TODO finish this
+        if (player)
         {
             // move the camera toward the player
             b2Vec2 pos = player->getPosition();
-            camera.setCenter({window.getView().getSize().x/2 - pos.x * PIXELS_PER_METER / pos.LengthSquared(), 
-                                window.getView().getSize().y/2 - pos.y * PIXELS_PER_METER / pos.LengthSquared()});
+            camera.setCenter({camera.getCenter().x - (camera.getCenter().x - pos.x * PIXELS_PER_METER)/20, 
+                                camera.getCenter().y - (camera.getCenter().y - pos.y * PIXELS_PER_METER)/20});
             window.setView(camera);
+
+            if (timer.getElapsedTime().asSeconds() >= 1)
+            {
+                timer.restart();
+                new Enemy((rand()%((int)camera.getSize().x) - camera.getSize().x/2)/PIXELS_PER_METER + player->getPosition().x, 
+                            (rand()%((int)camera.getSize().y) - camera.getSize().y/2)/PIXELS_PER_METER + player->getPosition().y, player);
+            }
         }
 
         // ---------------

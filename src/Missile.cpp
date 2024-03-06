@@ -6,6 +6,8 @@ sf::CircleShape Missile::_shape;
 
 Missile::Missile(const b2Vec2& position, const b2Rot& rotation, const b2Vec2& startingVel, const float& appliedForce) : _force(appliedForce)
 {
+    _startPos = position;
+
     _shape.setFillColor(sf::Color::Red);
     _shape.setRadius(4);
     _shape.setOrigin(2,2);
@@ -32,11 +34,18 @@ Missile::Missile(const b2Vec2& position, const b2Rot& rotation, const b2Vec2& st
 
 void Missile::Update(const float& deltaTime) 
 {
-    // TODO dont hard code this
-    // destroy the missile if it goes to far off screen
-    if (Object::getPosition().x < -20 || Object::getPosition().x > 212 || Object::getPosition().y < -20 || Object::getPosition().y > 128)
+    if (_explosionTime > 0.f)
     {
-        this->destroy();
+        _explosionTime += deltaTime;
+        if (_explosionTime >= 3)
+            this->destroy();
+        else if (_explosionTime >= 1)
+            _booster->setSpawning(false);
+    }
+    // destroy the missile if it travels to far
+    else if ((_startPos - Object::getPosition()).LengthSquared() >= 1000000)
+    {
+        explode();
         return;
     }
 
@@ -47,9 +56,30 @@ void Missile::Update(const float& deltaTime)
 
 void Missile::Draw(sf::RenderWindow& window)
 {
-    RectangleShape::setPosition({Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER});
-    RectangleShape::setRotation(Object::getRotation()*180/PI);
-    window.draw(*this);
+    if (_explosionTime == 0.f)
+    {
+        RectangleShape::setPosition({Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER});
+        RectangleShape::setRotation(Object::getRotation()*180/PI);
+        window.draw(*this);
+    }
+}
+
+void Missile::explode()
+{
+    _booster->clear();
+    _booster->setSpawnRate(0.1);
+    _booster->setSpawnAmount(20);
+    _booster->setFadeOutTime(1);
+    _booster->setLifetime(2);
+    _booster->setLocalPosition({0,0});
+    _booster->setSpread(360);
+    _booster->setVelocity(8);
+    _explosionTime += 0.01;
+
+    this->getBody()->SetLinearVelocity({0,0});
+    b2CircleShape temp;
+    temp.m_radius = 5;
+    this->createFixtureSensor(temp, 1);
 }
 
 void Missile::BeginContact(CollisionData collisionData)
@@ -57,6 +87,13 @@ void Missile::BeginContact(CollisionData collisionData)
     if (Enemy* enemy = collisionData.getCollider()->cast<Enemy>())
     {
         enemy->destroy();
-        this->destroy();
+        if (_explosionTime == 0.f) 
+        {
+            explode();
+        }
+        else
+        {
+            this->setPhysicsEnabled(false);
+        }
     }
 }

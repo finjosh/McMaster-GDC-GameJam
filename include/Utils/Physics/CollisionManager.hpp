@@ -4,6 +4,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <list>
 
 #include "box2d/b2_world_callbacks.h"
 #include "box2d/b2_contact.h"
@@ -30,6 +31,8 @@ protected:
 
 private:
     static std::unordered_set<Collider*> _objects;
+    static std::list<std::pair<Collider*, CollisionData>> _beginContact; // TODO optimize this
+    static std::list<std::pair<Collider*, CollisionData>> _endContact; // TODO optimize this
 };
 
 #endif

@@ -64,11 +64,12 @@ public:
     void setRandomSpawnAmount(const unsigned int& value = 1);
     /// @brief the max angle of spread
     float getSpread() const;
-    /// @brief the max angle of spread
+    /// @brief the max angle of spread (degrees)
     void setSpread(const float& value = 0.f);
     /// @brief how random the rotation will be
     float getRandomRotation() const;
     /// @brief how random the rotation will be
+    /// @note this is the rotation of the shape
     void setRandomRotation(const float& value = 0.1f);
     /// @brief the particle lifetime
     float getLifetime() const;
@@ -90,6 +91,8 @@ public:
     sf::Color getDefaultColor() const;
     /// @brief force emits the particles ignoring the spawn rate
     void emit();
+    /// @brief removes all particles
+    void clear();
 
     createDestroy();
 

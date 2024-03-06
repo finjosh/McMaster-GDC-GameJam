@@ -89,7 +89,7 @@ void Enemy::Update(const float& deltaTime)
 
 void Enemy::applyForward(const b2Vec2& forward)
 {
-    this->getBody()->ApplyForceToCenter((95) * forward, true);
+    this->getBody()->ApplyForceToCenter((115) * forward, true);
     _forwardBooster->emit();
 }
 

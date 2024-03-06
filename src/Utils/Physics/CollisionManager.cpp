@@ -3,6 +3,8 @@
 #include "Utils/ObjectManager.hpp"
 
 std::unordered_set<Collider*> CollisionManager::_objects;
+std::list<std::pair<Collider*, CollisionData>> CollisionManager::_beginContact;
+std::list<std::pair<Collider*, CollisionData>> CollisionManager::_endContact;
 
 void CollisionManager::BeginContact(b2Contact* contact)
 {
@@ -10,11 +12,13 @@ void CollisionManager::BeginContact(b2Contact* contact)
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if (A != nullptr)
     {
-        A->BeginContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
+        _beginContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
+        // A->BeginContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
     }
     if (B != nullptr)
     {
-        B->BeginContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
+        _beginContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
+        // B->BeginContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
     }
 }
 
@@ -24,11 +28,13 @@ void CollisionManager::EndContact(b2Contact* contact)
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if (A != nullptr)
     {
-        A->EndContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
+        _endContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
+        // A->EndContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
     }
     if (B != nullptr)
     {
-        B->EndContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
+        _endContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
+        // B->EndContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
     }
 }
 
@@ -66,6 +72,18 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
 
 void CollisionManager::Update()
 {
+    for (auto data: _beginContact)
+    {
+        data.first->BeginContact(data.second);
+    }
+    _beginContact.clear();
+
+    for (auto data: _endContact)
+    {
+        data.first->EndContact(data.second);
+    }
+    _endContact.clear();
+
     ObjectManager::ClearDestroyQueue();
 
     for (auto obj: _objects)

@@ -292,3 +292,8 @@ float ParticleEmitter::randX(const float& x)
 {
     return ((float)rand() / (float)RAND_MAX) * x;
 }
+
+void ParticleEmitter::clear()
+{
+    _particles.clear();
+}

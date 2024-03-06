@@ -19,6 +19,8 @@ public:
     virtual void Update(const float& deltaTime) override;
     virtual void Draw(sf::RenderWindow& window) override;
 
+    void explode();
+
     createDestroy();
 
 protected:
@@ -26,7 +28,9 @@ protected:
 
 private:
     float _force = 0.f;
+    float _explosionTime = 0.f;
     ParticleEmitter* _booster = nullptr;
+    b2Vec2 _startPos;
 
     static const b2Vec2 _size;
     static sf::CircleShape _shape;
