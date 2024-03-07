@@ -1,5 +1,6 @@
 #include "Player.hpp"
 #include "Missile.hpp"
+#include "Enemy.hpp"
 
 const b2Vec2 Player::_size = {50, 25};
 sf::CircleShape Player::_shape;
@@ -51,6 +52,7 @@ void Player::LateDraw(sf::RenderWindow& window)
 void Player::Update(const float& deltaTime)
 {
     _shootCooldown += deltaTime;
+    _hitTimer += deltaTime;
     
     if (WindowHandler::getRenderWindow()->hasFocus())
     {
@@ -142,9 +144,18 @@ void Player::shoot()
     }
 }
 
+int Player::getHealth() const
+{
+    return _health;
+}
+
 void Player::BeginContact(CollisionData collisionData) 
 {
-
+    if (auto enemy = collisionData.getCollider()->cast<Enemy>() && _hitTimer >= _hitCooldown)
+    {
+        _health--;
+        _hitTimer = 0;
+    }
 }
 
 void Player::EndContact(CollisionData collisionData) 

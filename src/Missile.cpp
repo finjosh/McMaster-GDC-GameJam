@@ -36,6 +36,11 @@ void Missile::Update(const float& deltaTime)
 {
     if (_explosionTime > 0.f)
     {
+        if (_stopPhysics) // so we can have one frame of the explosion physics
+            this->setPhysicsEnabled(false);
+        else
+            _stopPhysics = true;
+
         _explosionTime += deltaTime;
         if (_explosionTime >= 3)
             this->destroy();
@@ -90,10 +95,6 @@ void Missile::BeginContact(CollisionData collisionData)
         if (_explosionTime == 0.f) 
         {
             explode();
-        }
-        else
-        {
-            this->setPhysicsEnabled(false);
         }
     }
 }

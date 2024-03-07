@@ -31,6 +31,8 @@ public:
     /// @brief attempts to shoot a missile
     void shoot();
 
+    int getHealth() const;
+
 protected:
     virtual void Update(const float& deltaTime) override;
     virtual void LateDraw(sf::RenderWindow& window) override;
@@ -40,6 +42,9 @@ protected:
 
 private:
     float _shootCooldown = 0.f;
+    int _health = 10;
+    const float _hitCooldown = 1.5f;
+    float _hitTimer = 0.f;
     ParticleEmitter* _forwardBooster = nullptr;
     ParticleEmitter* _backwardBooster = nullptr;
     ParticleEmitter* _leftFBooster = nullptr;

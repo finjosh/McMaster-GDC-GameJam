@@ -29,6 +29,7 @@ protected:
 private:
     float _force = 0.f;
     float _explosionTime = 0.f;
+    bool _stopPhysics = false;
     ParticleEmitter* _booster = nullptr;
     b2Vec2 _startPos;
 

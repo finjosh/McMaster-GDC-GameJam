@@ -28,6 +28,7 @@ private:
     b2Fixture* _otherFixture;
 };
 
+// TODO make an onColliding function for while a body is actively colliding with this 
 // TODO completely hide all body functions unless they are needed
 // TODO refactor for easier to use code
 /// @note do not use body user data as that stores this collider

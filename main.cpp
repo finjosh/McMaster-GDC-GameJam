@@ -63,7 +63,7 @@ int main()
 
     tgui::Gui gui{window};
     gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
-    tgui::Theme::setDefault("themes/Dark.txt");
+    tgui::Theme::setDefault("themes/Black.txt");
     Command::color::setDefaultColor({255,255,255,255});
     // -----------------------
 
@@ -84,6 +84,15 @@ int main()
     Object::Ptr<> player = new Player(10,10,10);
     camera.setCenter(player->getPosition().x*PIXELS_PER_METER, player->getPosition().y*PIXELS_PER_METER);
     new Enemy(25,25, player);
+
+    auto healthBar = tgui::ProgressBar::create();
+    gui.add(healthBar);
+    healthBar->setSize({"25%","5%"});
+    healthBar->setPosition({"37.5%",healthBar->getSize().y/2});
+    healthBar->setFillDirection(tgui::ProgressBar::FillDirection::LeftToRight);
+    healthBar->setMaximum(player->cast<Player>()->getHealth());
+    healthBar->setValue(player->cast<Player>()->getHealth());
+    healthBar->setText("Health");
 
     UpdateManager::Start();
     sf::Clock deltaClock;
@@ -148,13 +157,15 @@ int main()
 
         if (player)
         {
+            healthBar->setValue(player->cast<Player>()->getHealth());
+
             // move the camera toward the player
             b2Vec2 pos = player->getPosition();
             camera.setCenter({camera.getCenter().x - (camera.getCenter().x - pos.x * PIXELS_PER_METER)/20, 
                                 camera.getCenter().y - (camera.getCenter().y - pos.y * PIXELS_PER_METER)/20});
             window.setView(camera);
 
-            if (timer.getElapsedTime().asSeconds() >= 1)
+            if (timer.getElapsedTime().asSeconds() >= 2)
             {
                 timer.restart();
                 new Enemy((rand()%((int)camera.getSize().x) - camera.getSize().x/2)/PIXELS_PER_METER + player->getPosition().x, 
