@@ -39,7 +39,7 @@ Label.Title {
 }
 
 Button.StartButton {
-    Position = ((1920 / 2) - (500 / 2), 420);
+    Position = ((1920 / 2) - (500 / 2), 330);
     Size = (500, 172.917);
     Text = Start;
     TextSize = 75;
@@ -62,7 +62,7 @@ Button.StartButton {
 
 Label."Best Time" {
     HorizontalAlignment = Center;
-    Position = (0, 850);
+    Position = (0, 650);
     Size = (1920, 204.895);
     Text = "Best Time: NA";
     TextSize = 75;
@@ -92,7 +92,7 @@ Label."Best Time" {
 }
 
 Button.ControlsButton {
-    Position = (780, 650);
+    Position = (780, 530);
     Size = (369, 100.272);
     Text = Controls;
     TextSize = 50;
@@ -110,5 +110,36 @@ Button.ControlsButton {
         TextureDownHover = None;
         TextureFocused = "themes/Black.png" Part(93, 53, 45, 50) Middle(10, 0) Smooth;
         TextureHover = "themes/Black.png" Part(140, 1, 45, 50) Middle(10, 0) Smooth;
+    }
+}
+
+Label."Last Time" {
+    HorizontalAlignment = Center;
+    Position = (0, 860);
+    Size = (1920, 204.895);
+    Text = "Last Time: NA";
+    TextSize = 75;
+    VerticalAlignment = Center;
+
+    Renderer {
+        BackgroundColor = #0000005E;
+        BorderColor = Black;
+        TextColor = white;
+        TextureBackground = None;
+
+        Scrollbar {
+            ArrowBackgroundColor = rgb(80, 80, 80);
+            ArrowColor = rgb(190, 190, 190);
+            TextureArrowDown = "themes/Black.png" Part(1, 230, 20, 20) Middle(0, 1, 20, 19) Smooth;
+            TextureArrowDownHover = "themes/Black.png" Part(306, 225, 20, 20) Middle(0, 1, 20, 19) Smooth;
+            TextureArrowUp = "themes/Black.png" Part(284, 225, 20, 20) Middle(0, 0, 20, 19) Smooth;
+            TextureArrowUpHover = "themes/Black.png" Part(285, 171, 20, 20) Middle(0, 0, 20, 19) Smooth;
+            TextureThumb = "themes/Black.png" Part(23, 230, 20, 20) Smooth;
+            TextureThumbHover = "themes/Black.png" Part(306, 193, 20, 20) Smooth;
+            TextureTrack = "themes/Black.png" Part(255, 1, 20, 20) Smooth;
+            TextureTrackHover = "themes/Black.png" Part(284, 203, 20, 20) Smooth;
+            ThumbColor = rgb(190, 190, 190);
+            TrackColor = rgb(80, 80, 80);
+        }
     }
 }

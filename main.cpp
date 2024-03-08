@@ -52,7 +52,7 @@ public:
     createDestroy();
 };
 
-void loadMainMenu(tgui::Gui& gui, tgui::ProgressBar::Ptr& healthBar, Object::Ptr<>& player, bool& _playingGame, bool& _controlsPage, const std::string& bestTime);
+void loadMainMenu(tgui::Gui& gui, tgui::ProgressBar::Ptr& healthBar, Object::Ptr<>& player, bool& _playingGame, bool& _controlsPage, const std::string& bestTime, const std::string& lastTime);
 
 // TODO setup a view manager that handles windows size changes
 int main()
@@ -106,10 +106,12 @@ int main()
         ini.overrideData();
         ini.addSection("General");
         ini.addValue("General", "Best Time", "NA");
+        ini.addValue("General", "Last Time", "NA");
     }
     std::string BestTime = ini.getValue("General", "Best Time");
+    std::string LastTime = ini.getValue("General", "Last Time");
 
-    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime);
+    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime, LastTime);
 
     UpdateManager::Start();
     sf::Clock deltaClock;
@@ -181,8 +183,11 @@ int main()
             lifeTimeTimer += deltaTime.asSeconds();
             if (player->cast<Player>()->getHealth() == 0)
             {
-                BestTime = StringHelper::FloatToStringRound(lifeTimeTimer, 2) + "s";
+                BestTime = lifeTimeTimer > StringHelper::toFloat(BestTime) ? StringHelper::FloatToStringRound(lifeTimeTimer, 2) + "s" : BestTime;
+                LastTime = StringHelper::FloatToStringRound(lifeTimeTimer) + "s";
                 ini.setValue("General", "Best Time", BestTime);
+                ini.setValue("General", "Last Time", LastTime);
+                lifeTimeTimer = 0;
 
                 _playingGame = false;
                 auto gameOverLabel = tgui::Label::create("Game Over!");
@@ -196,7 +201,7 @@ int main()
                 mainMenu->setTextSize(75);
                 mainMenu->setSize({"25%","15%"});
                 mainMenu->setPosition({"37.5%", "55%"});
-                mainMenu->onClick([&gui, &healthBar, &player, &_playingGame, &_enemies, &_controlsPage, &BestTime]()
+                mainMenu->onClick([&gui, &healthBar, &player, &_playingGame, &_enemies, &_controlsPage, &BestTime, &LastTime]()
                 {
                     gui.removeAllWidgets();
                     player->cast<Player>()->setHealth(10);
@@ -206,7 +211,7 @@ int main()
                             enemy->destroy();
                     }
                     _enemies.clear();
-                    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime);
+                    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime, LastTime);
                 });
             }
             healthBar->setValue(player->cast<Player>()->getHealth());
@@ -278,7 +283,7 @@ void addThemeCommands()
     });
 }
 
-void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr<> &player, bool &_playingGame, bool& _controlsPage, const std::string& bestTime)
+void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr<> &player, bool &_playingGame, bool& _controlsPage, const std::string& bestTime, const std::string& lastTime)
 {
     gui.loadWidgetsFromFile("Assets/MainMenu.txt");
     gui.get("StartButton")->cast<tgui::Button>()->onClick([&gui, &healthBar, &player, &_playingGame]()
@@ -294,7 +299,7 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         healthBar->setText("Health");
         _playingGame = true;
     });
-    gui.get("ControlsButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, bestTime]()
+    gui.get("ControlsButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, bestTime, lastTime]()
     {
         _controlsPage = true;
         gui.removeAllWidgets();
@@ -305,11 +310,11 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         walls[1] = (new Wall({0,(float)WindowHandler::getRenderWindow()->getSize().y/PIXELS_PER_METER + 10},{1000,20}))->getID();
         walls[2] = (new Wall({-10,0},{20,1000}))->getID();
         walls[3] = (new Wall({(float)WindowHandler::getRenderWindow()->getSize().x/PIXELS_PER_METER + 10,0},{20,1000}))->getID();
-        gui.get("MainMenuButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, walls, bestTime]()
+        gui.get("MainMenuButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, walls, bestTime, lastTime]()
         {
             _controlsPage = false;
             gui.removeAllWidgets();
-            loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, bestTime);
+            loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, bestTime, lastTime);
             for (int i = 0; i < 4; i++)
             {
                 ObjectManager::getObject(walls[i])->destroy();
@@ -317,4 +322,5 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         });
     });
     gui.get("Best Time")->cast<tgui::Label>()->setText("Best Time: " + bestTime);
+    gui.get("Last Time")->cast<tgui::Label>()->setText("Last Time: " + lastTime);
 }
