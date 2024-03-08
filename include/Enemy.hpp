@@ -34,8 +34,6 @@ protected:
     void EndContact(CollisionData collisionData) override;
 
 private:
-    // TODO make a const for the cool downs and change these to timers
-    float _shootCooldown = 0.f;
     ParticleEmitter* _forwardBooster = nullptr;
     ParticleEmitter* _backwardBooster = nullptr;
     ParticleEmitter* _leftFBooster = nullptr;
@@ -44,6 +42,8 @@ private:
     ParticleEmitter* _rightBBooster = nullptr;
 
     Object::Ptr<> _target = nullptr;
+    const float _hitCooldown = 1.f;
+    float _hitTimer = 0.f;
 
     static const b2Vec2 _size;
     static sf::CircleShape _shape;

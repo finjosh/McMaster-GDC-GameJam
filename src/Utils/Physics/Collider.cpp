@@ -14,7 +14,10 @@ Collider::Collider()
 Collider::~Collider()
 {
     if (_body != nullptr)
+    {
+        _body->GetUserData().pointer = (uintptr_t)nullptr; // removing the ptr from the body as box2d calls end contact with the user data
         WorldHandler::getWorld().DestroyBody(_body);
+    }
 
     CollisionManager::removeCollider(this);
 }

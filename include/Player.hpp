@@ -32,6 +32,7 @@ public:
     void shoot();
 
     int getHealth() const;
+    void setHealth(const int& health);
 
 protected:
     virtual void Update(const float& deltaTime) override;
@@ -43,8 +44,6 @@ protected:
 private:
     float _shootCooldown = 0.f;
     int _health = 10;
-    const float _hitCooldown = 1.5f;
-    float _hitTimer = 0.f;
     ParticleEmitter* _forwardBooster = nullptr;
     ParticleEmitter* _backwardBooster = nullptr;
     ParticleEmitter* _leftFBooster = nullptr;

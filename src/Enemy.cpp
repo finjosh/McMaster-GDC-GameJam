@@ -1,4 +1,5 @@
 #include "Enemy.hpp"
+#include "Player.hpp"
 
 const b2Vec2 Enemy::_size = {50, 25};
 sf::CircleShape Enemy::_shape;
@@ -50,8 +51,8 @@ void Enemy::LateDraw(sf::RenderWindow& window)
 
 void Enemy::Update(const float& deltaTime)
 {
-    _shootCooldown += deltaTime;
-    
+    _hitTimer += deltaTime;
+
     if (WindowHandler::getRenderWindow()->hasFocus())
     {
         b2Vec2 forward = this->getBody()->GetWorldPoint({_size.x/2,0}) - Object::getPosition();
@@ -117,7 +118,14 @@ void Enemy::applyRightTurn()
 
 void Enemy::BeginContact(CollisionData collisionData) 
 {
-
+    if (auto player = collisionData.getCollider()->cast<Player>())
+    {
+        if (_hitTimer >= _hitCooldown)
+        {
+            _hitTimer = 0;
+            player->setHealth(player->getHealth() - 1);
+        }
+    }
 }
 
 void Enemy::EndContact(CollisionData collisionData) 

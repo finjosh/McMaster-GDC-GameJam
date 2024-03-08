@@ -24,32 +24,34 @@ using namespace sf;
 
 void addThemeCommands();
 
-class Wall : public virtual Object, public Collider, public DrawableObject, public sf::RectangleShape
-{
-public:
-    inline Wall(const b2Vec2& pos, const b2Vec2& size)
-    {
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(size.x/2, size.y/2);
+// class Wall : public virtual Object, public Collider, public DrawableObject, public sf::RectangleShape
+// {
+// public:
+//     inline Wall(const b2Vec2& pos, const b2Vec2& size)
+//     {
+//         b2PolygonShape b2shape;
+//         b2shape.SetAsBox(size.x/2, size.y/2);
 
-        Collider::initCollider(pos.x,pos.y);
-        Collider::createFixture(b2shape, 1, 0.25);
-        Collider::getBody()->SetType(b2BodyType::b2_staticBody);
+//         Collider::initCollider(pos.x,pos.y);
+//         Collider::createFixture(b2shape, 1, 0.25);
+//         Collider::getBody()->SetType(b2BodyType::b2_staticBody);
 
-        RectangleShape::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
-        RectangleShape::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
-        RectangleShape::setFillColor(sf::Color::Red);
-    }
+//         RectangleShape::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
+//         RectangleShape::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
+//         RectangleShape::setFillColor(sf::Color::Red);
+//     }
 
-    inline virtual void Draw(sf::RenderWindow& window) override
-    {
-        RectangleShape::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
-        RectangleShape::setRotation(Object::getRotation()*180/PI);
-        window.draw(*this);
-    }
+//     inline virtual void Draw(sf::RenderWindow& window) override
+//     {
+//         RectangleShape::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
+//         RectangleShape::setRotation(Object::getRotation()*180/PI);
+//         window.draw(*this);
+//     }
 
-    createDestroy();
-};
+//     createDestroy();
+// };
+
+void loadMainMenu(tgui::Gui& gui, tgui::ProgressBar::Ptr& healthBar, Object::Ptr<>& player, bool& _playingGame);
 
 // TODO setup a view manager that handles windows size changes
 int main()
@@ -63,12 +65,12 @@ int main()
 
     tgui::Gui gui{window};
     gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
-    tgui::Theme::setDefault("themes/Black.txt");
+    tgui::Theme::setDefault("Assets/themes/Black.txt");
     Command::color::setDefaultColor({255,255,255,255});
     // -----------------------
 
     WorldHandler::getWorld().SetGravity({0.f,0.f});
-    WorldHandler::getWorld().SetContactListener(new CollisionManager);
+    WorldHandler::getWorld().SetContactListener(new CollisionManager); // TODO put this stuff into the constructor
 
     //! Required to initialize VarDisplay and CommandPrompt
     // creates the UI for the VarDisplay
@@ -83,25 +85,19 @@ int main()
 
     Object::Ptr<> player = new Player(10,10,10);
     camera.setCenter(player->getPosition().x*PIXELS_PER_METER, player->getPosition().y*PIXELS_PER_METER);
-    new Enemy(25,25, player);
 
-    auto healthBar = tgui::ProgressBar::create();
-    gui.add(healthBar);
-    healthBar->setSize({"25%","5%"});
-    healthBar->setPosition({"37.5%",healthBar->getSize().y/2});
-    healthBar->setFillDirection(tgui::ProgressBar::FillDirection::LeftToRight);
-    healthBar->setMaximum(player->cast<Player>()->getHealth());
-    healthBar->setValue(player->cast<Player>()->getHealth());
-    healthBar->setText("Health");
+    std::list<Object::Ptr<>> _enemies;
+
+    tgui::ProgressBar::Ptr healthBar;
+
+    bool _playingGame = false;
+
+    loadMainMenu(gui, healthBar, player, _playingGame);
 
     UpdateManager::Start();
     sf::Clock deltaClock;
     float fixedUpdate = 0;
     sf::Clock timer;
-    int frames = 0;
-    int fps = 0;
-    auto fpsLabel = tgui::Label::create("0");
-    gui.add(fpsLabel);
     float secondTimer = 0;
     while (window.isOpen())
     {
@@ -111,13 +107,9 @@ int main()
         sf::Time deltaTime = deltaClock.restart();
         fixedUpdate += deltaTime.asSeconds();
         secondTimer += deltaTime.asSeconds();
-        frames++;
         if (secondTimer >= 1)
         {
-            fps = frames;
-            frames = 0;
             secondTimer = 0;
-            fpsLabel->setText(std::to_string(fps));
         }
         sf::Event event;
         while (window.pollEvent(event))
@@ -132,13 +124,16 @@ int main()
             Command::Prompt::UpdateEvent(event);
             //! ----------------------------------------------------------
         }
-        UpdateManager::Update(deltaTime.asSeconds());
-        if (fixedUpdate >= 0.2)
+        if (_playingGame)
         {
-            fixedUpdate = 0;
-            UpdateManager::FixedUpdate();
+            UpdateManager::Update(deltaTime.asSeconds());
+            if (fixedUpdate >= 0.2)
+            {
+                fixedUpdate = 0;
+                UpdateManager::FixedUpdate();
+            }
+            UpdateManager::LateUpdate(deltaTime.asSeconds());
         }
-        UpdateManager::LateUpdate(deltaTime.asSeconds());
         //! Updates all the vars being displayed
         VarDisplay::Update();
         //! ------------------------------=-----
@@ -149,14 +144,44 @@ int main()
         //! ------------------------------
 
         //! Do physics before this
-        WorldHandler::updateWorld(deltaTime.asSeconds());
-        CollisionManager::Update();
+        if (_playingGame)
+        {
+            WorldHandler::updateWorld(deltaTime.asSeconds());
+            CollisionManager::Update();
+        }
         //! Draw after this
 
         //* Write code here
 
-        if (player)
+        if (player && _playingGame)
         {
+            if (player->cast<Player>()->getHealth() == 0)
+            {
+                _playingGame = false;
+                auto gameOverLabel = tgui::Label::create("Game Over!");
+                gui.add(gameOverLabel);
+                gameOverLabel->setTextSize(75);
+                gameOverLabel->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
+                gameOverLabel->setSize({"100%", gameOverLabel->getSize().y});
+                gameOverLabel->setPosition({"0", "30%"});
+                auto mainMenu = tgui::Button::create("Main Menu");
+                gui.add(mainMenu);
+                mainMenu->setTextSize(75);
+                mainMenu->setSize({"25%","15%"});
+                mainMenu->setPosition({"37.5%", "55%"});
+                mainMenu->onClick([&gui, &healthBar, &player, &_playingGame, &_enemies]()
+                {
+                    gui.removeAllWidgets();
+                    player->cast<Player>()->setHealth(10);
+                    for (auto enemy: _enemies)
+                    {
+                        if (enemy)
+                            enemy->destroy();
+                    }
+                    _enemies.clear();
+                    loadMainMenu(gui, healthBar, player, _playingGame);
+                });
+            }
             healthBar->setValue(player->cast<Player>()->getHealth());
 
             // move the camera toward the player
@@ -168,14 +193,15 @@ int main()
             if (timer.getElapsedTime().asSeconds() >= 2)
             {
                 timer.restart();
-                new Enemy((rand()%((int)camera.getSize().x) - camera.getSize().x/2)/PIXELS_PER_METER + player->getPosition().x, 
-                            (rand()%((int)camera.getSize().y) - camera.getSize().y/2)/PIXELS_PER_METER + player->getPosition().y, player);
+                _enemies.emplace_back(new Enemy((rand()%((int)camera.getSize().x) - camera.getSize().x/2)/PIXELS_PER_METER + player->getPosition().x, 
+                                                (rand()%((int)camera.getSize().y) - camera.getSize().y/2)/PIXELS_PER_METER + player->getPosition().y, player));
             }
         }
 
         // ---------------
 
-        DrawableManager::draw(window);
+        if (_playingGame) 
+            DrawableManager::draw(window);
 
         // draw for tgui
         gui.draw();
@@ -222,5 +248,23 @@ void addThemeCommands()
                 Command::color::setDefaultColor({0,0,0,255}); // black
             }}}
         }
+    });
+}
+
+void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr<> &player, bool &_playingGame)
+{
+    gui.loadWidgetsFromFile("Assets/MainMenu.txt");
+    gui.get("StartButton")->cast<tgui::Button>()->onClick([&gui, &healthBar, &player, &_playingGame]()
+    { 
+        gui.removeAllWidgets(); 
+        healthBar = tgui::ProgressBar::create();
+        gui.add(healthBar);
+        healthBar->setSize({"25%","5%"});
+        healthBar->setPosition({"37.5%",healthBar->getSize().y/2});
+        healthBar->setFillDirection(tgui::ProgressBar::FillDirection::LeftToRight);
+        healthBar->setMaximum(player->cast<Player>()->getHealth());
+        healthBar->setValue(player->cast<Player>()->getHealth());
+        healthBar->setText("Health");
+        _playingGame = true;
     });
 }

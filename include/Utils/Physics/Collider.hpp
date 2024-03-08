@@ -31,6 +31,7 @@ private:
 // TODO make an onColliding function for while a body is actively colliding with this 
 // TODO completely hide all body functions unless they are needed
 // TODO refactor for easier to use code
+// TODO find a way to deal with box2d on end collision and this being destroyed before that is called (dont destroy objects that have colliders till the end contact is called?)
 /// @note do not use body user data as that stores this collider
 class Collider : public virtual Object
 {
