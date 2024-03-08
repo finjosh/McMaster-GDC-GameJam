@@ -39,7 +39,7 @@ Label.Title {
 }
 
 Button.StartButton {
-    Position = ((1920 / 2) - (500 / 2), 480);
+    Position = ((1920 / 2) - (500 / 2), 420);
     Size = (500, 172.917);
     Text = Start;
     TextSize = 75;
@@ -62,13 +62,14 @@ Button.StartButton {
 
 Label."Best Time" {
     HorizontalAlignment = Center;
-    Position = (0, 710);
+    Position = (0, 850);
     Size = (1920, 204.895);
     Text = "Best Time: NA";
     TextSize = 75;
     VerticalAlignment = Center;
 
     Renderer {
+        BackgroundColor = #0000005E;
         BorderColor = Black;
         TextColor = white;
         TextureBackground = None;
@@ -87,5 +88,27 @@ Label."Best Time" {
             ThumbColor = rgb(190, 190, 190);
             TrackColor = rgb(80, 80, 80);
         }
+    }
+}
+
+Button.ControlsButton {
+    Position = (780, 650);
+    Size = (369, 100.272);
+    Text = Controls;
+    TextSize = 50;
+
+    Renderer {
+        BackgroundColor = rgb(80, 80, 80);
+        BackgroundColorHover = rgb(100, 100, 100);
+        BorderColor = Black;
+        TextColor = rgb(190, 190, 190);
+        TextColorHover = rgb(250, 250, 250);
+        Texture = "themes/Black.png" Part(140, 53, 45, 50) Middle(10, 0) Smooth;
+        TextureDisabled = None;
+        TextureDown = "themes/Black.png" Part(125, 105, 45, 50) Middle(10, 0) Smooth;
+        TextureDownFocused = None;
+        TextureDownHover = None;
+        TextureFocused = "themes/Black.png" Part(93, 53, 45, 50) Middle(10, 0) Smooth;
+        TextureHover = "themes/Black.png" Part(140, 1, 45, 50) Middle(10, 0) Smooth;
     }
 }

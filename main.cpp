@@ -10,6 +10,7 @@
 #include "Utils/Utils.hpp"
 #include "Utils/Graphics/WindowHandler.hpp"
 #include "Utils/Physics/WorldHandler.hpp"
+#include "Utils/iniParser.hpp"
 
 #include "Utils/UpdateManager.hpp"
 #include "Utils/Graphics/DrawableManager.hpp"
@@ -24,34 +25,34 @@ using namespace sf;
 
 void addThemeCommands();
 
-// class Wall : public virtual Object, public Collider, public DrawableObject, public sf::RectangleShape
-// {
-// public:
-//     inline Wall(const b2Vec2& pos, const b2Vec2& size)
-//     {
-//         b2PolygonShape b2shape;
-//         b2shape.SetAsBox(size.x/2, size.y/2);
+class Wall : public virtual Object, public Collider, public DrawableObject, public sf::RectangleShape
+{
+public:
+    inline Wall(const b2Vec2& pos, const b2Vec2& size)
+    {
+        b2PolygonShape b2shape;
+        b2shape.SetAsBox(size.x/2, size.y/2);
 
-//         Collider::initCollider(pos.x,pos.y);
-//         Collider::createFixture(b2shape, 1, 0.25);
-//         Collider::getBody()->SetType(b2BodyType::b2_staticBody);
+        Collider::initCollider(pos.x,pos.y);
+        Collider::createFixture(b2shape, 1, 0.25);
+        Collider::getBody()->SetType(b2BodyType::b2_staticBody);
 
-//         RectangleShape::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
-//         RectangleShape::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
-//         RectangleShape::setFillColor(sf::Color::Red);
-//     }
+        RectangleShape::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
+        RectangleShape::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
+        RectangleShape::setFillColor(sf::Color::Red);
+    }
 
-//     inline virtual void Draw(sf::RenderWindow& window) override
-//     {
-//         RectangleShape::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
-//         RectangleShape::setRotation(Object::getRotation()*180/PI);
-//         window.draw(*this);
-//     }
+    inline virtual void Draw(sf::RenderWindow& window) override
+    {
+        RectangleShape::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
+        RectangleShape::setRotation(Object::getRotation()*180/PI);
+        window.draw(*this);
+    }
 
-//     createDestroy();
-// };
+    createDestroy();
+};
 
-void loadMainMenu(tgui::Gui& gui, tgui::ProgressBar::Ptr& healthBar, Object::Ptr<>& player, bool& _playingGame);
+void loadMainMenu(tgui::Gui& gui, tgui::ProgressBar::Ptr& healthBar, Object::Ptr<>& player, bool& _playingGame, bool& _controlsPage, const std::string& bestTime);
 
 // TODO setup a view manager that handles windows size changes
 int main()
@@ -91,14 +92,31 @@ int main()
     tgui::ProgressBar::Ptr healthBar;
 
     bool _playingGame = false;
+    bool _controlsPage = false;
 
-    loadMainMenu(gui, healthBar, player, _playingGame);
+    iniParser ini;
+    ini.setFilePath("Assets/BestTime.txt");
+    if (!ini.isOpen())
+    {
+        ini.createFile("Assets/BestTime.txt");
+        ini.setFilePath("Assets/BestTime.txt");        
+    }
+    if (!ini.LoadData())
+    {
+        ini.overrideData();
+        ini.addSection("General");
+        ini.addValue("General", "Best Time", "NA");
+    }
+    std::string BestTime = ini.getValue("General", "Best Time");
+
+    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime);
 
     UpdateManager::Start();
     sf::Clock deltaClock;
     float fixedUpdate = 0;
     sf::Clock timer;
     float secondTimer = 0;
+    float lifeTimeTimer;
     while (window.isOpen())
     {
         EventHelper::Event::ThreadSafe::update();
@@ -124,7 +142,7 @@ int main()
             Command::Prompt::UpdateEvent(event);
             //! ----------------------------------------------------------
         }
-        if (_playingGame)
+        if (_playingGame || _controlsPage)
         {
             UpdateManager::Update(deltaTime.asSeconds());
             if (fixedUpdate >= 0.2)
@@ -144,7 +162,7 @@ int main()
         //! ------------------------------
 
         //! Do physics before this
-        if (_playingGame)
+        if (_playingGame || _controlsPage)
         {
             WorldHandler::updateWorld(deltaTime.asSeconds());
             CollisionManager::Update();
@@ -153,10 +171,19 @@ int main()
 
         //* Write code here
 
+        if (_controlsPage)
+        {
+            camera.setCenter({camera.getSize().x/2,camera.getSize().y/2});
+            window.setView(camera);
+        }
         if (player && _playingGame)
         {
+            lifeTimeTimer += deltaTime.asSeconds();
             if (player->cast<Player>()->getHealth() == 0)
             {
+                BestTime = StringHelper::FloatToStringRound(lifeTimeTimer, 2) + "s";
+                ini.setValue("General", "Best Time", BestTime);
+
                 _playingGame = false;
                 auto gameOverLabel = tgui::Label::create("Game Over!");
                 gui.add(gameOverLabel);
@@ -169,7 +196,7 @@ int main()
                 mainMenu->setTextSize(75);
                 mainMenu->setSize({"25%","15%"});
                 mainMenu->setPosition({"37.5%", "55%"});
-                mainMenu->onClick([&gui, &healthBar, &player, &_playingGame, &_enemies]()
+                mainMenu->onClick([&gui, &healthBar, &player, &_playingGame, &_enemies, &_controlsPage, &BestTime]()
                 {
                     gui.removeAllWidgets();
                     player->cast<Player>()->setHealth(10);
@@ -179,7 +206,7 @@ int main()
                             enemy->destroy();
                     }
                     _enemies.clear();
-                    loadMainMenu(gui, healthBar, player, _playingGame);
+                    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime);
                 });
             }
             healthBar->setValue(player->cast<Player>()->getHealth());
@@ -200,7 +227,7 @@ int main()
 
         // ---------------
 
-        if (_playingGame) 
+        if (_playingGame || _controlsPage) 
             DrawableManager::draw(window);
 
         // draw for tgui
@@ -251,7 +278,7 @@ void addThemeCommands()
     });
 }
 
-void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr<> &player, bool &_playingGame)
+void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr<> &player, bool &_playingGame, bool& _controlsPage, const std::string& bestTime)
 {
     gui.loadWidgetsFromFile("Assets/MainMenu.txt");
     gui.get("StartButton")->cast<tgui::Button>()->onClick([&gui, &healthBar, &player, &_playingGame]()
@@ -267,4 +294,27 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         healthBar->setText("Health");
         _playingGame = true;
     });
+    gui.get("ControlsButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, bestTime]()
+    {
+        _controlsPage = true;
+        gui.removeAllWidgets();
+        gui.loadWidgetsFromFile("Assets/Controls.txt");
+        player->setPosition({1920/2/PIXELS_PER_METER,1080/2/PIXELS_PER_METER});
+        size_t walls[4];
+        walls[0] = (new Wall({0,-10},{1000,20}))->getID();
+        walls[1] = (new Wall({0,(float)WindowHandler::getRenderWindow()->getSize().y/PIXELS_PER_METER + 10},{1000,20}))->getID();
+        walls[2] = (new Wall({-10,0},{20,1000}))->getID();
+        walls[3] = (new Wall({(float)WindowHandler::getRenderWindow()->getSize().x/PIXELS_PER_METER + 10,0},{20,1000}))->getID();
+        gui.get("MainMenuButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, walls, bestTime]()
+        {
+            _controlsPage = false;
+            gui.removeAllWidgets();
+            loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, bestTime);
+            for (int i = 0; i < 4; i++)
+            {
+                ObjectManager::getObject(walls[i])->destroy();
+            }
+        });
+    });
+    gui.get("Best Time")->cast<tgui::Label>()->setText("Best Time: " + bestTime);
 }

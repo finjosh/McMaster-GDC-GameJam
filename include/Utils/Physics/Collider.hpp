@@ -104,6 +104,13 @@ public:
 
     bool canSetTransform() const override;
 
+    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    void setPosition(const b2Vec2& position) override;
+    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    void setRotation(const float& rotation) override;
+    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    void setTransform(const b2Transform& transform) override;
+
 protected:
     /// @brief creates a body in the world with the default body def parameters
     void initCollider(const float& x = 0.f, const float& y = 0.f, const float& rot = 0.f);
@@ -114,11 +121,6 @@ protected:
     void initCollider(const b2BodyDef& bodyDef);
 
 private:
-    // removing the ability to set position or rotation if there is a collider
-    inline void setPosition(const b2Vec2& position) override {};
-    inline void setRotation(const float& rotation) override {};
-    inline void setTransform(const b2Transform& transform) override {};
-
     /// @brief updates the body state (enabled or not)
     void updatePhysicsState();
 

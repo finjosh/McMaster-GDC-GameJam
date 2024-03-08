@@ -1,0 +1,51 @@
+Button.MainMenuButton {
+    Position = ((1920 / 2) - (224 / 2), 890);
+    Size = (224, 50);
+    Text = "Main Menu";
+    TextSize = 25;
+
+    Renderer {
+        BackgroundColor = rgb(80, 80, 80);
+        BackgroundColorHover = rgb(100, 100, 100);
+        BorderColor = Black;
+        TextColor = rgb(190, 190, 190);
+        TextColorHover = rgb(250, 250, 250);
+        Texture = "themes/Black.png" Part(140, 53, 45, 50) Middle(10, 0) Smooth;
+        TextureDisabled = None;
+        TextureDown = "themes/Black.png" Part(125, 105, 45, 50) Middle(10, 0) Smooth;
+        TextureDownFocused = None;
+        TextureDownHover = None;
+        TextureFocused = "themes/Black.png" Part(93, 53, 45, 50) Middle(10, 0) Smooth;
+        TextureHover = "themes/Black.png" Part(140, 1, 45, 50) Middle(10, 0) Smooth;
+    }
+}
+
+Label.ControlsLabel {
+    AutoSize = true;
+    Position = (90, 90);
+    Size = (512.4, 618);
+    Text = "Forward: W\nBackward: S\nTurn Left: A\nTurn Right: D\nMove Left: Q\nMove Right: E\nShoot: Space";
+    TextSize = 75;
+
+    Renderer {
+        BackgroundColor = #00000062;
+        BorderColor = Black;
+        TextColor = white;
+        TextureBackground = None;
+
+        Scrollbar {
+            ArrowBackgroundColor = rgb(80, 80, 80);
+            ArrowColor = rgb(190, 190, 190);
+            TextureArrowDown = "themes/Black.png" Part(1, 230, 20, 20) Middle(0, 1, 20, 19) Smooth;
+            TextureArrowDownHover = "themes/Black.png" Part(306, 225, 20, 20) Middle(0, 1, 20, 19) Smooth;
+            TextureArrowUp = "themes/Black.png" Part(284, 225, 20, 20) Middle(0, 0, 20, 19) Smooth;
+            TextureArrowUpHover = "themes/Black.png" Part(285, 171, 20, 20) Middle(0, 0, 20, 19) Smooth;
+            TextureThumb = "themes/Black.png" Part(23, 230, 20, 20) Smooth;
+            TextureThumbHover = "themes/Black.png" Part(306, 193, 20, 20) Smooth;
+            TextureTrack = "themes/Black.png" Part(255, 1, 20, 20) Smooth;
+            TextureTrackHover = "themes/Black.png" Part(284, 203, 20, 20) Smooth;
+            ThumbColor = rgb(190, 190, 190);
+            TrackColor = rgb(80, 80, 80);
+        }
+    }
+}

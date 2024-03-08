@@ -149,3 +149,27 @@ b2Fixture* CollisionData::getFixtureB()
 {
     return _otherFixture;
 }
+
+void Collider::setPosition(const b2Vec2& position) 
+{
+    if (this->_body != nullptr)
+    {
+        this->_body->SetTransform(position, this->_body->GetAngle());
+    }
+}
+
+void Collider::setRotation(const float& rotation) 
+{
+    if (this->_body != nullptr)
+    {
+        this->_body->SetTransform(this->_body->GetPosition(), rotation);
+    }
+}
+
+void Collider::setTransform(const b2Transform& transform) 
+{
+    if (this->_body != nullptr)
+    {
+        this->_body->SetTransform(transform.p, transform.q.GetAngle());
+    }
+}
