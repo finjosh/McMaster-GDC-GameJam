@@ -52,7 +52,7 @@ public:
     createDestroy();
 };
 
-void loadMainMenu(tgui::Gui& gui, tgui::ProgressBar::Ptr& healthBar, Object::Ptr<>& player, bool& _playingGame, bool& _controlsPage, const std::string& bestTime, const std::string& lastTime);
+void loadMainMenu(tgui::Gui& gui, tgui::ProgressBar::Ptr& healthBar, Object::Ptr<>& player, bool& _playingGame, bool& _controlsPage, const std::string& bestTime, const std::string& lastTime, tgui::ProgressBar::Ptr& waveBar);
 
 // TODO setup a view manager that handles windows size changes
 int main()
@@ -97,6 +97,7 @@ int main()
     std::list<Object::Ptr<>> _enemies;
 
     tgui::ProgressBar::Ptr healthBar;
+    tgui::ProgressBar::Ptr nextWave;
 
     bool _playingGame = false;
     bool _controlsPage = false;
@@ -118,12 +119,14 @@ int main()
     std::string BestTime = ini.getValue("General", "Best Time");
     std::string LastTime = ini.getValue("General", "Last Time");
 
-    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime, LastTime);
+    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime, LastTime, nextWave);
 
     UpdateManager::Start();
     sf::Clock deltaClock;
     float fixedUpdate = 0;
-    sf::Clock timer;
+    float timer = 0;
+    int spawnAmount = 1;
+    float spawnTimer = 1;
     float secondTimer = 0;
     float lifeTimeTimer;
     while (window.isOpen())
@@ -188,6 +191,7 @@ int main()
         if (player && _playingGame)
         {
             lifeTimeTimer += deltaTime.asSeconds();
+            timer += deltaTime.asSeconds();
             if (player->cast<Player>()->getHealth() == 0)
             {
                 BestTime = lifeTimeTimer > StringHelper::toFloat(BestTime) ? StringHelper::FloatToStringRound(lifeTimeTimer, 2) + "s" : BestTime;
@@ -208,7 +212,7 @@ int main()
                 mainMenu->setTextSize(75);
                 mainMenu->setSize({"25%","15%"});
                 mainMenu->setPosition({"37.5%", "55%"});
-                mainMenu->onClick([&gui, &healthBar, &player, &_playingGame, &_enemies, &_controlsPage, &BestTime, &LastTime]()
+                mainMenu->onClick([&gui, &healthBar, &player, &_playingGame, &_enemies, &_controlsPage, &BestTime, &LastTime, &nextWave]()
                 {
                     gui.removeAllWidgets();
                     player->cast<Player>()->setHealth(10);
@@ -218,10 +222,11 @@ int main()
                             enemy->destroy();
                     }
                     _enemies.clear();
-                    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime, LastTime);
+                    loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, BestTime, LastTime, nextWave);
                 });
             }
             healthBar->setValue(player->cast<Player>()->getHealth());
+            nextWave->setValue(timer/spawnTimer*1000);
 
             // move the camera toward the player
             b2Vec2 pos = player->getPosition();
@@ -229,11 +234,17 @@ int main()
                                 camera.getCenter().y - (camera.getCenter().y - pos.y * PIXELS_PER_METER)/20});
             window.setView(camera);
 
-            if (timer.getElapsedTime().asSeconds() >= 2)
+            if (timer >= spawnTimer)
             {
-                timer.restart();
-                _enemies.emplace_back(new Enemy((rand()%((int)camera.getSize().x) - camera.getSize().x/2)/PIXELS_PER_METER + player->getPosition().x, 
-                                                (rand()%((int)camera.getSize().y) - camera.getSize().y/2)/PIXELS_PER_METER + player->getPosition().y, player));
+                spawnTimer += spawnAmount/spawnTimer*8;
+                nextWave->setValue(0);
+                spawnAmount++;
+                timer = 0;
+                for (int i = 0; i < spawnAmount; i++)
+                {
+                    _enemies.emplace_back(new Enemy((rand()%((int)camera.getSize().x) - camera.getSize().x/2)/PIXELS_PER_METER + player->getPosition().x, 
+                                                    (rand()%((int)camera.getSize().y) - camera.getSize().y/2)/PIXELS_PER_METER + player->getPosition().y, player));
+                }
             }
         }
 
@@ -318,10 +329,10 @@ void addThemeCommands()
     });
 }
 
-void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr<> &player, bool &_playingGame, bool& _controlsPage, const std::string& bestTime, const std::string& lastTime)
+void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr<> &player, bool &_playingGame, bool& _controlsPage, const std::string& bestTime, const std::string& lastTime, tgui::ProgressBar::Ptr& waveBar)
 {
     gui.loadWidgetsFromFile("Assets/MainMenu.txt");
-    gui.get("StartButton")->cast<tgui::Button>()->onClick([&gui, &healthBar, &player, &_playingGame]()
+    gui.get("StartButton")->cast<tgui::Button>()->onClick([&gui, &healthBar, &player, &_playingGame, &waveBar]()
     { 
         gui.removeAllWidgets(); 
         healthBar = tgui::ProgressBar::create();
@@ -332,10 +343,18 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         healthBar->setMaximum(player->cast<Player>()->getHealth());
         healthBar->setValue(player->cast<Player>()->getHealth());
         healthBar->setText("Health");
+        waveBar = tgui::ProgressBar::create();
+        gui.add(waveBar);
+        waveBar->setSize({"40%","2.5%"});
+        waveBar->setPosition({"30%","97.5%"});
+        waveBar->setFillDirection(tgui::ProgressBar::FillDirection::LeftToRight);
+        waveBar->setMaximum(1000);
+        waveBar->setValue(0);
+        waveBar->setText("Next Wave");
         _playingGame = true;
         player->cast<Player>()->removeBullets();
     });
-    gui.get("ControlsButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, bestTime, lastTime]()
+    gui.get("ControlsButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, bestTime, lastTime, &waveBar]()
     {
         _controlsPage = true;
         gui.removeAllWidgets();
@@ -347,11 +366,11 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         walls[2] = (new Wall({-10,0},{20,1000}))->getID();
         walls[3] = (new Wall({(float)WindowHandler::getRenderWindow()->getView().getSize().x/PIXELS_PER_METER + 10,0},{20,1000}))->getID();
         player->cast<Player>()->removeBullets();
-        gui.get("MainMenuButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, walls, bestTime, lastTime]()
+        gui.get("MainMenuButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, walls, bestTime, lastTime, &waveBar]()
         {
             _controlsPage = false;
             gui.removeAllWidgets();
-            loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, bestTime, lastTime);
+            loadMainMenu(gui, healthBar, player, _playingGame, _controlsPage, bestTime, lastTime, waveBar);
             for (int i = 0; i < 4; i++)
             {
                 ObjectManager::getObject(walls[i])->destroy();

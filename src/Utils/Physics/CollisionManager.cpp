@@ -26,16 +26,18 @@ void CollisionManager::EndContact(b2Contact* contact)
 {
     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
-    if (A != nullptr)
-    {
+    // TODO fix this
+    if (A == nullptr || B == nullptr) return;
+    // if (A != nullptr)
+    // {
         _endContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
         // A->EndContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
-    }
-    if (B != nullptr)
-    {
+    // }
+    // if (B != nullptr)
+    // {
         _endContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
         // B->EndContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
-    }
+    // }
 }
 
 void CollisionManager::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
@@ -81,14 +83,7 @@ void CollisionManager::Update()
     // TODO fix bug where box2d calls end contact after the body is destroyed and then this crashes
     for (auto data: _endContact)
     {
-        try // TODO do this better
-        {
-            data.first->EndContact(data.second);
-        }
-        catch(const std::exception& e)
-        {
-            continue;
-        }        
+        data.first->EndContact(data.second);
     }
     _endContact.clear();
 

@@ -99,13 +99,13 @@ void Player::Update(const float& deltaTime)
 
 void Player::applyForward(const b2Vec2& forward)
 {
-    this->getBody()->ApplyForceToCenter((100) * forward, true);
+    this->getBody()->ApplyForceToCenter((90) * forward, true);
     _forwardBooster->emit();
 }
 
 void Player::applyBackward(const b2Vec2& forward)
 {
-    this->getBody()->ApplyForceToCenter((-100) * forward, true);
+    this->getBody()->ApplyForceToCenter((-90) * forward, true);
     _backwardBooster->emit();
 }
 
@@ -128,7 +128,7 @@ void Player::applyRightTurn()
 void Player::applyLeft(const b2Vec2& forward)
 {
     b2Vec2 temp(forward.y, -forward.x);
-    this->getBody()->ApplyForceToCenter((80) * temp, true);
+    this->getBody()->ApplyForceToCenter((70) * temp, true);
     _leftFBooster->emit();
     _rightBBooster->emit();
 }
@@ -136,7 +136,7 @@ void Player::applyLeft(const b2Vec2& forward)
 void Player::applyRight(const b2Vec2& forward)
 {
     b2Vec2 temp(forward.y, -forward.x);
-    this->getBody()->ApplyForceToCenter((-80) * temp, true);
+    this->getBody()->ApplyForceToCenter((-70) * temp, true);
     _leftBBooster->emit();
     _rightFBooster->emit();
 }
