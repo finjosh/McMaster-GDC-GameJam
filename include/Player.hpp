@@ -34,6 +34,8 @@ public:
     int getHealth() const;
     void setHealth(const int& health);
 
+    void removeBullets();
+
 protected:
     virtual void Update(const float& deltaTime) override;
     virtual void LateDraw(sf::RenderWindow& window) override;
@@ -50,6 +52,8 @@ private:
     ParticleEmitter* _leftBBooster = nullptr;
     ParticleEmitter* _rightFBooster = nullptr;
     ParticleEmitter* _rightBBooster = nullptr;
+
+    std::list<Object::Ptr<>> _bullets;
 
     static const b2Vec2 _size;
     static sf::CircleShape _shape;

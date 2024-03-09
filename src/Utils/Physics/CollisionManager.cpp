@@ -78,9 +78,17 @@ void CollisionManager::Update()
     }
     _beginContact.clear();
 
+    // TODO fix bug where box2d calls end contact after the body is destroyed and then this crashes
     for (auto data: _endContact)
     {
-        data.first->EndContact(data.second);
+        try // TODO do this better
+        {
+            data.first->EndContact(data.second);
+        }
+        catch(const std::exception& e)
+        {
+            continue;
+        }        
     }
     _endContact.clear();
 
@@ -88,7 +96,7 @@ void CollisionManager::Update()
 
     for (auto obj: _objects)
     {
-        obj->_updatePosition();
+        obj->_update();
     }
 }
 

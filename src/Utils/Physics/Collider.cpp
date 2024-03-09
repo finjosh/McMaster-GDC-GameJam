@@ -98,7 +98,7 @@ void Collider::initCollider(const b2BodyDef& bodyDef)
 {
     _body = WorldHandler::getWorld().CreateBody(&bodyDef);
     _body->GetUserData().pointer = (uintptr_t)this;
-    _updatePosition();
+    _update();
 }
 
 void Collider::setPhysicsEnabled(const bool& enabled)
@@ -121,7 +121,7 @@ void Collider::updatePhysicsState()
     _body->SetEnabled(_enabled && Object::isEnabled());
 }
 
-void Collider::_updatePosition()
+void Collider::_update()
 {
     Object::setTransform(_body->GetTransform());
 }

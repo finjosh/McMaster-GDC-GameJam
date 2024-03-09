@@ -45,7 +45,15 @@ void Player::LateDraw(sf::RenderWindow& window)
 {
     RectangleShape::setPosition({Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER});
     RectangleShape::setRotation(Object::getRotation()*180/b2_pi);
+    auto temp = RectangleShape({20,20});
+    b2Vec2 forward = this->getBody()->GetWorldPoint({_size.x/2,0}) - Object::getPosition();
+    forward.Normalize();
+    temp.setOrigin({10,10});
+    temp.setPosition({(Object::getPosition().x + forward.x)*PIXELS_PER_METER, (Object::getPosition().y + forward.y)*PIXELS_PER_METER});
+    temp.setRotation(Object::getRotation()*180/b2_pi);
+    temp.setFillColor(sf::Color(125,125,125,255));
     window.draw(*this);
+    window.draw(temp);
 }
 
 void Player::Update(const float& deltaTime)
@@ -138,7 +146,7 @@ void Player::shoot()
     if (_shootCooldown >= 1)
     {
         _shootCooldown = 0.f;
-        new Missile(Object::getPosition(), Object::getRotation_b2(), this->getBody()->GetLinearVelocity(), 50.f);
+        _bullets.emplace_back(new Missile(Object::getPosition(), Object::getRotation_b2(), this->getBody()->GetLinearVelocity(), 50.f));
     }
 }
 
@@ -150,6 +158,14 @@ int Player::getHealth() const
 void Player::setHealth(const int& health)
 {
     _health = health;
+}
+
+void Player::removeBullets()
+{
+    for (auto obj: _bullets)
+    {
+        obj->destroy();
+    }
 }
 
 void Player::BeginContact(CollisionData collisionData) 

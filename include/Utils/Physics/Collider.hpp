@@ -8,6 +8,8 @@
 #include "Utils/Physics/WorldHandler.hpp"
 #include "Utils/Object.hpp"
 
+class CollisionManager;
+
 class Collider;
 
 class CollisionData
@@ -99,9 +101,6 @@ public:
     /// @param impulse the impulse data
     inline virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
 
-    /// @brief only use this if you know what you are doing
-    void _updatePosition();
-
     bool canSetTransform() const override;
 
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
@@ -119,6 +118,11 @@ protected:
     void initCollider(const b2Vec2& pos, const b2Rot& rot = b2Rot(0));
     /// @brief create a body in the world with the given body def
     void initCollider(const b2BodyDef& bodyDef);
+
+    /// @brief only use this if you know what you are doing
+    void _update();
+
+    friend CollisionManager;
 
 private:
     /// @brief updates the body state (enabled or not)

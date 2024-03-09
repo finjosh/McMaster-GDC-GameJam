@@ -86,6 +86,13 @@ int main()
 
     Object::Ptr<> player = new Player(10,10,10);
     camera.setCenter(player->getPosition().x*PIXELS_PER_METER, player->getPosition().y*PIXELS_PER_METER);
+    sf::RectangleShape _inGameBackground;
+    sf::Texture backgroundTexture;
+    backgroundTexture.loadFromFile("Assets/background.png");
+    _inGameBackground.setTexture(&backgroundTexture);
+    _inGameBackground.setOrigin({(float)backgroundTexture.getSize().x/2, (float)backgroundTexture.getSize().y/2});
+    _inGameBackground.setSize({(float)backgroundTexture.getSize().x, (float)backgroundTexture.getSize().y});
+    b2Vec2 _gameBackgroundPos;
 
     std::list<Object::Ptr<>> _enemies;
 
@@ -233,7 +240,35 @@ int main()
         // ---------------
 
         if (_playingGame || _controlsPage) 
+        {
+            if (_gameBackgroundPos.x + (float)backgroundTexture.getSize().x/2 < player->getPosition().x*PIXELS_PER_METER)
+            {
+                _gameBackgroundPos.x += (float)backgroundTexture.getSize().x;
+            }
+            else if (_gameBackgroundPos.x - (float)backgroundTexture.getSize().x/2 > player->getPosition().x*PIXELS_PER_METER)
+            {
+                _gameBackgroundPos.x -= (float)backgroundTexture.getSize().x;
+            }
+            if (_gameBackgroundPos.y + (float)backgroundTexture.getSize().y/2 < player->getPosition().y*PIXELS_PER_METER)
+            {
+                _gameBackgroundPos.y += (float)backgroundTexture.getSize().y;
+            }
+            else if (_gameBackgroundPos.y - (float)backgroundTexture.getSize().y/2 > player->getPosition().y*PIXELS_PER_METER)
+            {
+                _gameBackgroundPos.y -= (float)backgroundTexture.getSize().y;
+            }
+
+            for (int i = -4; i < 5; i++)
+            {
+                for (int j = -3; j < 4; j++)
+                {
+                    _inGameBackground.setPosition({_gameBackgroundPos.x + i*(int)_inGameBackground.getTexture()->getSize().x, _gameBackgroundPos.y + j*(int)_inGameBackground.getTexture()->getSize().y});
+                    window.draw(_inGameBackground);
+                }
+            }
+
             DrawableManager::draw(window);
+        }
 
         // draw for tgui
         gui.draw();
@@ -298,6 +333,7 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         healthBar->setValue(player->cast<Player>()->getHealth());
         healthBar->setText("Health");
         _playingGame = true;
+        player->cast<Player>()->removeBullets();
     });
     gui.get("ControlsButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, bestTime, lastTime]()
     {
@@ -307,9 +343,10 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         player->setPosition({1920/2/PIXELS_PER_METER,1080/2/PIXELS_PER_METER});
         size_t walls[4];
         walls[0] = (new Wall({0,-10},{1000,20}))->getID();
-        walls[1] = (new Wall({0,(float)WindowHandler::getRenderWindow()->getSize().y/PIXELS_PER_METER + 10},{1000,20}))->getID();
+        walls[1] = (new Wall({0,(float)WindowHandler::getRenderWindow()->getView().getSize().y/PIXELS_PER_METER + 10},{1000,20}))->getID();
         walls[2] = (new Wall({-10,0},{20,1000}))->getID();
-        walls[3] = (new Wall({(float)WindowHandler::getRenderWindow()->getSize().x/PIXELS_PER_METER + 10,0},{20,1000}))->getID();
+        walls[3] = (new Wall({(float)WindowHandler::getRenderWindow()->getView().getSize().x/PIXELS_PER_METER + 10,0},{20,1000}))->getID();
+        player->cast<Player>()->removeBullets();
         gui.get("MainMenuButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, walls, bestTime, lastTime]()
         {
             _controlsPage = false;
@@ -319,6 +356,7 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
             {
                 ObjectManager::getObject(walls[i])->destroy();
             }
+            player->cast<Player>()->removeBullets();
         });
     });
     gui.get("Best Time")->cast<tgui::Label>()->setText("Best Time: " + bestTime);

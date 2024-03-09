@@ -43,7 +43,7 @@ private:
 
     Object::Ptr<> _target = nullptr;
     const float _hitCooldown = 1.f;
-    float _hitTimer = 0.f;
+    float _hitTimer = 10.f;
 
     static const b2Vec2 _size;
     static sf::CircleShape _shape;
