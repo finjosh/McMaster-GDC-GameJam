@@ -1,3 +1,3 @@
 [General]
-Best Time=128.43s
-Last Time=94.5s
+Best Time=36.43s
+Last Time=36.4s

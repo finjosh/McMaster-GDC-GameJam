@@ -199,6 +199,9 @@ int main()
                 ini.setValue("General", "Best Time", BestTime);
                 ini.setValue("General", "Last Time", LastTime);
                 lifeTimeTimer = 0;
+                timer = 0;
+                spawnAmount = 1;
+                spawnTimer = 1;
 
                 _playingGame = false;
                 auto gameOverLabel = tgui::Label::create("Game Over!");
