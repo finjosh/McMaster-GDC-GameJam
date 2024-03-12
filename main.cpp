@@ -195,7 +195,7 @@ int main()
             if (player->cast<Player>()->getHealth() == 0)
             {
                 BestTime = lifeTimeTimer > StringHelper::toFloat(BestTime) ? StringHelper::FloatToStringRound(lifeTimeTimer, 2) + "s" : BestTime;
-                LastTime = StringHelper::FloatToStringRound(lifeTimeTimer) + "s";
+                LastTime = StringHelper::FloatToStringRound(lifeTimeTimer, 2) + "s";
                 ini.setValue("General", "Best Time", BestTime);
                 ini.setValue("General", "Last Time", LastTime);
                 lifeTimeTimer = 0;
