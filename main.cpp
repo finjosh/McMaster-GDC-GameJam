@@ -61,6 +61,11 @@ int main()
     // setup for sfml and tgui
     sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Example Game", sf::Style::Fullscreen);
     window.setFramerateLimit(60);
+    sf::Image icon;
+    if (icon.loadFromFile("Assets/icon.png"))
+    {
+        window.setIcon(256,256, icon.getPixelsPtr());
+    }
     WindowHandler::setRenderWindow(&window);
     sf::View camera(sf::FloatRect{0,0,1920,1080});
     window.setView(camera); // TODO make camera its own class
