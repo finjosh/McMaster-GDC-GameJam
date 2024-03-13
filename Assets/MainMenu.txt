@@ -143,3 +143,25 @@ Label."Last Time" {
         }
     }
 }
+
+Button.Exit {
+    Position = (1760, 10);
+    Size = (140, 48.4167);
+    Text = Exit;
+    TextSize = 35;
+
+    Renderer {
+        BackgroundColor = rgb(80, 80, 80);
+        BackgroundColorHover = rgb(100, 100, 100);
+        BorderColor = Black;
+        TextColor = rgb(190, 190, 190);
+        TextColorHover = rgb(250, 250, 250);
+        Texture = "themes/Black.png" Part(140, 53, 45, 50) Middle(10, 0) Smooth;
+        TextureDisabled = None;
+        TextureDown = "themes/Black.png" Part(125, 105, 45, 50) Middle(10, 0) Smooth;
+        TextureDownFocused = None;
+        TextureDownHover = None;
+        TextureFocused = "themes/Black.png" Part(93, 53, 45, 50) Middle(10, 0) Smooth;
+        TextureHover = "themes/Black.png" Part(140, 1, 45, 50) Middle(10, 0) Smooth;
+    }
+}

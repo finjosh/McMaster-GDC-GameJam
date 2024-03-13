@@ -53,6 +53,7 @@ public:
 };
 
 void loadMainMenu(tgui::Gui& gui, tgui::ProgressBar::Ptr& healthBar, Object::Ptr<>& player, bool& _playingGame, bool& _controlsPage, const std::string& bestTime, const std::string& lastTime, tgui::ProgressBar::Ptr& waveBar);
+void loadAreYouSureMenu(tgui::Gui& gui, const std::string& text, funcHelper::func<> onAccept, funcHelper::func<> onCancel);
 
 // TODO setup a view manager that handles windows size changes
 int main()
@@ -356,6 +357,13 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
         waveBar->setText("Next Wave");
         _playingGame = true;
         player->cast<Player>()->removeBullets();
+
+        auto exitButton = tgui::Button::create("Exit");
+        gui.add(exitButton);
+        exitButton->setPosition({"93.5%","2.5%"});
+        exitButton->setTextSize(35);
+        exitButton->setSize({"6%","4%"});
+        exitButton->onClick([&gui, &_playingGame](){ loadAreYouSureMenu(gui, "Are you sure you want to exit?\nThis run will be lost!", [](){ WindowHandler::getRenderWindow()->close(); }, [&_playingGame](){ _playingGame = true; }); _playingGame = false; });
     });
     gui.get("ControlsButton")->cast<tgui::Button>()->onClick([&gui, &_controlsPage, &healthBar, &player, &_playingGame, bestTime, lastTime, &waveBar]()
     {
@@ -383,4 +391,40 @@ void loadMainMenu(tgui::Gui &gui, tgui::ProgressBar::Ptr &healthBar, Object::Ptr
     });
     gui.get("Best Time")->cast<tgui::Label>()->setText("Best Time: " + bestTime);
     gui.get("Last Time")->cast<tgui::Label>()->setText("Last Time: " + lastTime);
+    gui.get("Exit")->cast<tgui::Button>()->onClick(&sf::RenderWindow::close, WindowHandler::getRenderWindow());
+}
+
+void loadAreYouSureMenu(tgui::Gui& gui, const std::string& text, funcHelper::func<> onAccept, funcHelper::func<> onCancel)
+{
+    auto background = tgui::Panel::create();
+    gui.add(background);
+    auto label = tgui::Label::create(text);
+    gui.add(label);
+    label->setTextSize(100);
+    label->setPosition({"50%","20%"});
+    label->setOrigin(0.5, 0.5);
+    label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
+    auto accept = tgui::Button::create("Yes");
+    auto cancel = tgui::Button::create("No");
+    gui.add(accept);
+    gui.add(cancel);
+
+    funcHelper::func<> temp = [background, label, accept, cancel, &gui]()
+    { 
+        gui.remove(background); 
+        gui.remove(label); 
+        gui.remove(accept); 
+        gui.remove(cancel); 
+    };
+
+    accept->setSize({"20%","12.5%"});
+    accept->setPosition({"25%", "60%"});
+    accept->setTextSize(75);
+    accept->onClick(temp.getBoundFunction());
+    accept->onClick(onAccept.getBoundFunction());
+    cancel->setSize({"20%","12.5%"});
+    cancel->setPosition({"55%", "60%"});
+    cancel->setTextSize(75);
+    cancel->onClick(temp.getBoundFunction());
+    cancel->onClick(onCancel.getBoundFunction());
 }

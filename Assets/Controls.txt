@@ -24,11 +24,10 @@ Label.ControlsLabel {
     AutoSize = true;
     Position = (90, 90);
     Size = (512.4, 618);
-    Text = "Forward: W\nBackward: S\nTurn Left: A\nTurn Right: D\nMove Left: Q\nMove Right: E\nShoot: Space\nGive it a try!";
+    Text = "Give the controls a try now!\nForward: W\nBackward: S\nTurn Left: A\nTurn Right: D\nMove Left: Q\nMove Right: E\nShoot: Space";
     TextSize = 75;
 
     Renderer {
-        BackgroundColor = #00000062;
         BorderColor = Black;
         TextColor = white;
         TextureBackground = None;

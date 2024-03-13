@@ -55,7 +55,7 @@ CC=g++
 # static (remove -static for it to no longer be static)
 STATIC_BUILD=-static
 # debugging build (remove -g for the compiled project to not be a debugging build)
-DEBUG_BUILD=-g
+DEBUG_BUILD=
 # flags to generate dependencies for all .o files
 DEPFLAGS=-MP -MD
 # any compiler options
