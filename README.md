@@ -14,8 +14,8 @@ Tested and built with:
 [cpp-Utilities](https://github.com/finjosh/cpp-Utilities)
   - Latest Release as of 2024-03-08
 
-[Backend Object Management](https://github.com/finjosh/Networking-Library)
-  - The object management was taken from my networking library example game and expanded upon
+Backend Object Management
+  - The object management was taken from an example from another repo which is no private and expanded upon
 
 ![image](https://github.com/finjosh/McMaster-GDC-GameJam/assets/109707607/ebdf0b3d-5007-45ae-9f26-cc3e55a3e6e9)
 ![image](https://github.com/finjosh/McMaster-GDC-GameJam/assets/109707607/9809dd96-fab4-42e7-8a7e-525a2ce890b6)
