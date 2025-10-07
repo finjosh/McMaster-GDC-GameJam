@@ -2,7 +2,7 @@
 A simple Space theme game made for the McMaster GDC space jam
 
 Tested and built with: 
-  - Compiler: MSYS2
+  - Compiler: g++
   - Version: g++.exe (Rev3, Built by MSYS2 project) 12.1.0
 
 [SFML](https://www.sfml-dev.org/index.php):
